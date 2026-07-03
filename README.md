@@ -1,5 +1,7 @@
 # KampongDrop MVP
 
+https://kampong-drop.vercel.app/
+
 KampongDrop is a web MVP for HDB group food runs. It supports nearby run discovery, host-created hubs, neighbor reservations, live delivery-fee recalculation, host manifests, WhatsApp export, and arrival status.
 
 ## Run locally
