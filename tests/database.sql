@@ -26,12 +26,21 @@ do $$declare h uuid:=current_setting('bitez.test_hub')::uuid; o uuid; begin
  if (select items_total_price from public.sub_orders where id=o)<>11 then raise exception 'TEST FAILED: calculated total';end if;
  if (select current_split_fee from public.order_hubs where id=h)<>4.5 then raise exception 'TEST FAILED: split';end if;
  begin perform public.reserve_order(h,'[{"name":"Rice","qty":1,"price":5}]');raise exception 'TEST FAILED: duplicate join';exception when raise_exception then if sqlerrm like 'TEST FAILED:%' then raise;end if;end;
- begin perform public.set_run_status(h,'LOCKED');raise exception 'TEST FAILED: nonhost status';exception when raise_exception then if sqlerrm like 'TEST FAILED:%' then raise;end if;end;
+ begin begin perform public.set_run_status(h,null);raise exception 'TEST FAILED: null status';exception when raise_exception then if sqlerrm like 'TEST FAILED:%' then raise;end if;end;
+ begin perform public.delete_my_account();raise exception 'TEST FAILED: active host deletion';exception when raise_exception then if sqlerrm like 'TEST FAILED:%' then raise;end if;end;
+ perform public.set_run_status(h,'LOCKED');raise exception 'TEST FAILED: nonhost status';exception when raise_exception then if sqlerrm like 'TEST FAILED:%' then raise;end if;end;
 end$$;
 select set_config('request.jwt.claim.sub','00000000-0000-4000-8000-000000000003',true);
 do $$declare h uuid:=current_setting('bitez.test_hub')::uuid; begin
  if (select count(*) from public.sub_orders)<>0 then raise exception 'TEST FAILED: order privacy';end if;
  begin perform public.reserve_order(h,'[{"name":"Rice","qty":1,"price":5}]');raise exception 'TEST FAILED: over capacity';exception when raise_exception then if sqlerrm like 'TEST FAILED:%' then raise;end if;end;
+ insert into public.user_blocks(user_id,blocked_user_id,blocked_name)values(auth.uid(),'00000000-0000-4000-8000-000000000001','Test host');
+ if jsonb_array_length(public.discover_runs(1.34,103.70,500,'Expired test',0))<>0 then raise exception 'TEST FAILED: blocked discovery';end if;
+ begin perform public.reserve_order(current_setting('bitez.test_hub2')::uuid,'[{"name":"Rice","qty":1,"price":5}]');raise exception 'TEST FAILED: blocked reservation';exception when raise_exception then if sqlerrm not like '%blocked%' then raise;end if;end;
+ perform public.report_run(h,'Test report for authorization checks.');
+ if(select count(*) from public.safety_reports)<>1 then raise exception 'TEST FAILED: own report access';end if;
+ delete from public.user_blocks where user_id=auth.uid();
+ if jsonb_array_length(public.discover_runs(1.34,103.70,500,'Expired test',0))<>1 then raise exception 'TEST FAILED: unblock discovery';end if;
 end$$;
 select set_config('request.jwt.claim.sub','00000000-0000-4000-8000-000000000002',true);
 do $$begin perform public.cancel_order(current_setting('bitez.test_order')::uuid); if(select current_split_fee from public.order_hubs where id=current_setting('bitez.test_hub')::uuid)<>9 then raise exception 'TEST FAILED: cancellation split';end if;perform public.reserve_order(current_setting('bitez.test_hub')::uuid,'[{"name":"Rice","qty":1,"price":5}]');end$$;
@@ -39,6 +48,8 @@ select set_config('request.jwt.claim.sub','00000000-0000-4000-8000-000000000001'
 do $$declare h uuid:=current_setting('bitez.test_hub')::uuid; begin
  if (select count(*) from public.sub_orders where hub_id=h)<>1 then raise exception 'TEST FAILED: host manifest';end if;
  begin perform public.set_run_status(h,'ARRIVED');raise exception 'TEST FAILED: invalid transition';exception when raise_exception then if sqlerrm like 'TEST FAILED:%' then raise;end if;end;
+ begin perform public.set_run_status(h,null);raise exception 'TEST FAILED: null status';exception when raise_exception then if sqlerrm like 'TEST FAILED:%' then raise;end if;end;
+ begin perform public.delete_my_account();raise exception 'TEST FAILED: active host deletion';exception when raise_exception then if sqlerrm like 'TEST FAILED:%' then raise;end if;end;
  perform public.set_run_status(h,'LOCKED');
 end$$;
 select set_config('request.jwt.claim.sub','00000000-0000-4000-8000-000000000002',true);
@@ -50,9 +61,11 @@ set local role authenticated;
 do $$begin begin perform public.reserve_order(current_setting('bitez.test_hub2')::uuid,'[{"name":"Rice","qty":1,"price":5}]');raise exception 'TEST FAILED: expired join';exception when raise_exception then if sqlerrm like 'TEST FAILED:%' then raise;end if;end;end$$;
 select set_config('request.jwt.claim.sub','00000000-0000-4000-8000-000000000001',true);
 do $$begin perform public.set_run_status(current_setting('bitez.test_hub')::uuid,'ARRIVED');perform public.collect_order(current_setting('bitez.test_order')::uuid);if(select current_split_fee from public.order_hubs where id=current_setting('bitez.test_hub')::uuid)<>4.5 then raise exception 'TEST FAILED: collection altered split';end if;end$$;
+select set_config('request.jwt.claim.sub','00000000-0000-4000-8000-000000000003',true);
+do $$begin perform public.delete_my_account();begin perform public.create_run('Deleted user stall','Public test pickup','640001',1.34,103.70,now()+interval '1 hour',6,3);raise exception 'TEST FAILED: deleted account still writes';exception when raise_exception then if sqlerrm like 'TEST FAILED:%' then raise;end if;end;end$$;
 reset role;
 set local role anon;
 do $$begin begin perform public.reserve_order(current_setting('bitez.test_hub')::uuid,'[]');raise exception 'TEST FAILED: anonymous mutation';exception when insufficient_privilege then null;end;end$$;
 reset role;
 rollback;
-select 'PASS: profile/order privacy, RPC ownership, host restriction, server totals, duplicates, capacity, cancellation, locked/expired/anonymous rejection, search and collection split. All fixtures rolled back.' as result;
+select 'PASS: profile/order privacy, RPC ownership, host restriction, server totals, duplicates, capacity, cancellation, locked/expired/anonymous rejection, search, collection split, blocking/unblocking, reporting, deletion guards and deleted-token write rejection. All fixtures rolled back.' as result;
