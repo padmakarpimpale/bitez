@@ -798,12 +798,6 @@ dialog.modal::backdrop {
 .hero {
   padding: 22px 0 0;
 }
-.welcomeGrid {
-  display: grid;
-  grid-template-columns: minmax(0, 1.2fr) minmax(260px, 0.8fr);
-  gap: clamp(24px, 4vw, 60px);
-  align-items: center;
-}
 .locationLabel {
   display: inline-flex;
   align-items: center;
@@ -827,67 +821,6 @@ dialog.modal::backdrop {
 }
 .welcomeIntro .welcomeNote {
   font-size: 13px;
-}
-.splitExample {
-  border: 1px solid #e6cdbf;
-  background: #fff3ea;
-  padding: clamp(22px, 3vw, 36px);
-  border-radius: 20px;
-}
-.exampleLabel {
-  display: block;
-  font-size: 15px;
-  font-weight: 600;
-}
-.examplePeople {
-  display: flex;
-  gap: 7px;
-  margin: 24px 0;
-}
-.examplePeople > span {
-  display: grid;
-  place-items: center;
-  width: 34px;
-  height: 34px;
-  border-radius: 50%;
-  color: #734530;
-  background: #f5d8c5;
-}
-.exampleMath {
-  display: flex;
-  align-items: center;
-  gap: 18px;
-  font-size: 27px;
-  font-weight: 700;
-}
-.exampleMath small {
-  display: block;
-  font-size: 11px;
-  font-weight: 400;
-}
-.exampleMath .divide {
-  color: var(--muted);
-  font-size: 22px;
-}
-.exampleResult {
-  display: flex;
-  align-items: baseline;
-  gap: 10px;
-  margin-top: 24px;
-  padding-top: 18px;
-  border-top: 1px solid #e6cdbf;
-}
-.exampleResult strong {
-  font-size: 50px;
-  letter-spacing: -2px;
-  color: #92361f;
-}
-.exampleResult > span {
-  font-size: 13px;
-}
-.splitExample > p {
-  margin: 12px 0 0;
-  font-size: 11px;
 }
 .welcomeDetails {
   display: grid;
@@ -1012,15 +945,6 @@ dialog.modal::backdrop {
 .cancelledSplit {
   margin: 8px 0;
 }
-@media (max-width: 1100px) {
-  .welcomeGrid {
-    grid-template-columns: 1fr;
-    gap: 26px;
-  }
-  .splitExample {
-    max-width: 460px;
-  }
-}
 @media (max-width: 540px) {
   .welcomeDetails {
     grid-template-columns: 1fr;
@@ -1029,9 +953,6 @@ dialog.modal::backdrop {
   }
   .hero h1 {
     font-size: 38px;
-  }
-  .examplePeople {
-    gap: 9px;
   }
   .brand small {
     display: none;
