@@ -4,6 +4,7 @@ import android.Manifest;
 import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.content.ActivityNotFoundException;
+import android.content.ComponentName;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
@@ -335,7 +336,12 @@ public final class MainActivity extends ComponentActivity {
         try {
             Intent intent = new Intent(UrlPolicy.isSafeMailLink(url) ? Intent.ACTION_SENDTO : Intent.ACTION_VIEW, Uri.parse(url));
             // No explicit package, arbitrary intent scheme or credential-bearing URL.
-            startActivity(Intent.createChooser(intent, UrlPolicy.isSafeMailLink(url) ? "Contact Bitez" : "Open link"));
+            Intent chooser = Intent.createChooser(intent, UrlPolicy.isSafeMailLink(url) ? "Contact Bitez" : "Open link");
+            // Legal links must remain readable before agreement; do not offer
+            // this wrapper as its own external browser and reopen the dialog.
+            chooser.putExtra(Intent.EXTRA_EXCLUDE_COMPONENTS,
+                    new ComponentName[]{new ComponentName(this, MainActivity.class)});
+            startActivity(chooser);
         } catch (ActivityNotFoundException ignored) { Toast.makeText(this, "No app available to open this link.", Toast.LENGTH_SHORT).show(); }
     }
     private void showMenu(View anchor) {
