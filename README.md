@@ -41,7 +41,7 @@ All table access uses explicit grants plus RLS. Mutating RPCs have public securi
 
 ## Vercel deployment
 
-The existing deployment is documented at https://kampong-drop.vercel.app/.
+The production deployment is https://bitez-sg.vercel.app/. The Vercel project and GitHub repository are both named `bitez`. The previous https://kampong-drop.vercel.app/ address also remains connected.
 
 Configure these variables for Production and Preview in Vercel:
 
