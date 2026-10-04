@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Plus, X, MapPin, ArrowRight, Flag } from "lucide-react";
+import { Plus, X, MapPin, ArrowRight, Flag, MessageCircle } from "lucide-react";
 import { client, rpc } from "../api";
 import type { Action, CartItem, Hub, SubOrder } from "../types";
 import {
@@ -19,6 +19,7 @@ export function Reservation({
   hasProfile,
   action,
   onDone,
+  onOpenChat,
 }: {
   hub: Hub;
   user: string;
@@ -27,6 +28,7 @@ export function Reservation({
   hasProfile: boolean;
   action: Action;
   onDone: () => void;
+  onOpenChat: (hub: Hub) => void;
 }) {
   const [items, setItems] = useState<CartItem[]>([
       { name: "", qty: 1, price: 0 },
@@ -57,6 +59,12 @@ export function Reservation({
         <strong>{shortTime(hub.cutoff_time)}</strong>
       </div>
       <DeliverySplit hub={hub} />
+      {hub.meal_note && (
+        <div className="mealInvitation">
+          <strong>Optional shared meal</strong>
+          <p>{hub.meal_note}</p>
+        </div>
+      )}
       <a
         className="textLink"
         href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(hub.pickup_latitude + "," + hub.pickup_longitude)}`}
@@ -67,10 +75,20 @@ export function Reservation({
       </a>
       {joined ? (
         <div className="banner success">
-          You have joined this run. Check My runs for updates.
+          You have joined this run.
+          <button onClick={() => onOpenChat(hub)}>
+            <MessageCircle size={17} />
+            Open group chat
+          </button>
         </div>
       ) : isHost ? (
-        <p>You are the host. Manage this run in My runs.</p>
+        <div className="actions">
+          <button className="primary" onClick={() => onOpenChat(hub)}>
+            <MessageCircle size={17} />
+            Open group chat
+          </button>
+          <p className="fine">Manage the run in My runs.</p>
+        </div>
       ) : (
         <form
           onSubmit={(e) => {
@@ -84,11 +102,33 @@ export function Reservation({
                 p_hub: hub.id,
                 p_items: items.map((i) => ({ ...i, name: i.name.trim() })),
               });
-              onDone();
+              onOpenChat(hub);
             });
           }}
         >
           <h3>Your order</h3>
+          <div className="decideTogether">
+            <MessageCircle size={22} />
+            <div>
+              <strong>Still deciding? Join the conversation.</strong>
+              <p>
+                Reserve a place, chat with the group, then save your food order
+                before cutoff.
+              </p>
+              <button
+                type="button"
+                disabled={busy || !hasProfile || !canJoin(hub)}
+                onClick={() =>
+                  void action(async () => {
+                    await rpc("join_run_chat", { p_hub: hub.id });
+                    onOpenChat(hub);
+                  })
+                }
+              >
+                Join and decide in chat <ArrowRight size={16} />
+              </button>
+            </div>
+          </div>
           <p className="fine">
             Enter items from this restaurant. Prices are your estimates; agree
             final costs with the host at pickup.

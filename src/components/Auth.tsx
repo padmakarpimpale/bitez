@@ -8,10 +8,12 @@ export function Auth({
   busy,
   action,
   notify,
+  onSignedIn,
 }: {
   busy: boolean;
   action: Action;
   notify: (s: string) => void;
+  onSignedIn: () => void;
 }) {
   const [mode, setMode] = useState<"login" | "signup" | "reset">("login");
   return (
@@ -29,6 +31,7 @@ export function Auth({
               password,
             });
             if (error) throw error;
+            onSignedIn();
           } else if (mode === "signup") {
             const { error } = await client().auth.signUp({
               email,

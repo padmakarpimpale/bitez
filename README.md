@@ -9,7 +9,10 @@ Neighbour-organised food runs in Singapore. A host publishes a restaurant, publi
 - Search by restaurant, host, block/instructions or pickup postal code; radius filters, straight-line pickup distance and server-side pagination.
 - Optional browser GPS with consent, manual area selection, clickable pickup map and coordinate fallback. Area-centre searches are labelled approximate.
 - Multi-item reservations; server-computed totals, unique participant reservations, capacity and deadline enforcement, cancellation before cutoff and row locks around run mutations.
-- Private participant orders and host manifests, combined items, copy export, order locking, arrival and collection controls.
+- Private participant orders and host manifests, including the host’s saved items, copy export, order locking, arrival and collection controls.
+- Member-only persistent real-time group chat for each run, host announcements, pickup replies, reporting/removal, reconnect fallback and paginated history.
+- Join first and choose food in chat; save/edit orders before cutoff. Unfinished reservations must be resolved before locking.
+- Shareable authenticated run invites and optional invitations to eat together at a public pickup point.
 - Block/report controls, basic per-user quotas, account deletion, public `/privacy` and `/terms` pages.
 - Responsive mobile navigation, accessible native dialogs, Bitez vector branding and mobile icons, Web App Manifest, Vercel security headers and dependency lockfile.
 
@@ -37,6 +40,8 @@ The linked project is `kjbxtjfcybkdwzqyqqmv` in Singapore. Ordered SQL upgrades 
 
 All table access uses explicit grants plus RLS. Mutating RPCs have public security-invoker wrappers and private security-definer implementations with fixed empty search paths, authenticated caller checks, ownership checks and input validation. Direct writes to runs and reservations are revoked. The private schema must **not** be exposed in Data API settings.
 
+`tests/chat-database.sql` checks membership, outsider/anonymous denial, blocks, retry idempotency, message quotas, moderation, cart edits and incomplete-order locking. It uses rollback-only fixtures. The chat migrations have already been applied to the linked project; do not manually rerun them there. New installations should apply the ordered migration files.
+
 `tests/database.sql` exercises real database authorization and business rules with temporary fixtures inside a rolled-back transaction. Execute it through the Supabase SQL editor as the database owner. It must finish with PASS and leave no test users/orders behind.
 
 ## Vercel deployment
@@ -56,6 +61,6 @@ In Supabase Auth URL settings, set the production Site URL and allow the exact p
 
 ## Release limits and operations
 
-This is a pilot, not an audited production service. Read `docs/RELEASE.md` for the outstanding launch requirements and Android plan. No card payments, restaurant API, delivery integration, background push notifications or guaranteed moderation are implemented. The host counts in the fee split but their own food items must be added when placing the final restaurant order. Rounding differences are agreed outside the app. Do not promise payments or merchant-confirmed prices.
+This is a pilot, not an audited production service. Read `docs/RELEASE.md` for the outstanding launch requirements and Android plan. No card payments, restaurant API, delivery integration, background push notifications or guaranteed moderation are implemented. The host counts in the fee split and can now save their own food items in the run room; saved host items are included in the manifest. Chat remains foreground-only; it does not provide push notifications. Rounding differences are agreed outside the app. Do not promise payments or merchant-confirmed prices.
 
 OpenStreetMap tiles need a working Internet connection and visible attribution. Comply with the tile usage policy and choose a supported provider before substantial traffic. The manual coordinate fallback remains usable if tiles fail.

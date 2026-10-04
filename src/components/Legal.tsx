@@ -13,9 +13,9 @@ export function Legal({ page }: { page: "privacy" | "terms" }) {
           <p>
             Bitez stores your account email, encrypted authentication
             credentials managed by Supabase, display name, profile postal code,
-            optional block, hosted runs, reservations, reports and your
-            blocked-neighbour list. We do not collect payment card details or
-            require a phone number.
+            optional block, hosted runs, reservations, group chat messages, host
+            announcements, reports and your blocked-neighbour list. We do not
+            collect payment card details or require a phone number.
           </p>
           <h2>Location</h2>
           <p>
@@ -34,14 +34,27 @@ export function Legal({ page }: { page: "privacy" | "terms" }) {
             Singapore; Vercel hosts the application. Both providers may keep
             operational logs under their own policies.
           </p>
+          <h2>Group chats</h2>
+          <p>
+            Only the host and neighbours with an active reservation can read a
+            run’s chat. Chat shows your display name and messages to those
+            members. Leaving or being removed from a run ends your access. Chat
+            messages are available for 30 days after the order cutoff; messaging
+            closes 24 hours after cutoff or when a run is cancelled. Messages
+            are stored until the run or relevant account is deleted; the 30-day
+            window limits access, not database retention. Do not share private
+            home addresses, passwords, payment details or other sensitive
+            information in chat. The host can remove messages; members can
+            report them to the pilot operator.
+          </p>
           <h2>Delete your account and data</h2>
           <p>
             Open Account, sign in, then select Delete my account. Finish or
             cancel outstanding runs and reservations first. Deletion removes
-            your account, profile, hosted runs, reservations and reports.
-            Deleting a hosted run removes its participant orders too. Backups
-            and infrastructure logs may remain until the providers’ retention
-            periods expire. No account data is sold.
+            your account, profile, hosted runs, reservations, your authored chat
+            messages and reports. Deleting a hosted run removes its participant
+            orders too. Backups and infrastructure logs may remain until the
+            providers’ retention periods expire. No account data is sold.
           </p>
           <h2>Questions or deletion assistance</h2>
           <p>
@@ -68,7 +81,8 @@ export function Legal({ page }: { page: "privacy" | "terms" }) {
             by active participants, rounded to cents; agree any rounding
             difference and final restaurant bill directly. You can cancel before
             cutoff while the run is open. After cutoff or locking, coordinate
-            with the host at pickup. Hosts must communicate changes responsibly.
+            with the host in the run chat or at pickup. Hosts must communicate
+            changes responsibly.
           </p>
           <h2>Safe participation</h2>
           <p>
@@ -77,6 +91,15 @@ export function Legal({ page }: { page: "privacy" | "terms" }) {
             passwords. Confirm food choices and allergies directly with the
             restaurant. Do not pay strangers in advance without independently
             verifying the arrangement.
+          </p>
+          <h2>Group decisions and optional meals</h2>
+          <p>
+            You may join a run before choosing food. Save your items before the
+            cutoff. The host cannot lock an order with unfinished neighbour
+            reservations, and may remove unfinished reservations to finalise the
+            group order. Chat discussion does not update your saved food order
+            automatically. A shared meal invitation is optional; choosing pickup
+            only is always allowed.
           </p>
           <h2>Reports</h2>
           <p>
