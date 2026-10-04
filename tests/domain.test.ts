@@ -7,8 +7,25 @@ import {
   localInputTime,
   manifest,
   validateItems,
+  deliveryEstimate,
 } from "../src/utils.ts";
 import type { Hub, SubOrder } from "../src/types.ts";
+test("delivery forecasts use joined people, not vacant places, and round to cents", () => {
+  assert.equal(deliveryEstimate(6, 1), 6);
+  assert.equal(deliveryEstimate(6, 3), 2);
+  assert.equal(deliveryEstimate(6, 6), 1);
+  assert.equal(deliveryEstimate(6, 2), 3);
+  assert.equal(deliveryEstimate(10, 3), 3.33);
+  assert.equal(deliveryEstimate(0, 6), 0);
+  for (const [fee, people] of [
+    [NaN, 6],
+    [-1, 6],
+    [6, 0],
+    [6, 1.5],
+    [6, Infinity],
+  ])
+    assert.equal(deliveryEstimate(fee, people), null);
+});
 test("distance uses actual pickup coordinates and is symmetric", () => {
   assert.equal(distanceMeters(1.34, 103.7, 1.34, 103.7), 0);
   const a = distanceMeters(1.34, 103.7, 1.35, 103.7);

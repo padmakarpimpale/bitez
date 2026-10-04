@@ -3,6 +3,7 @@ import { Copy } from "lucide-react";
 import { client, rpc, getManifest, message } from "../api";
 import type { Action, Hub, SubOrder } from "../types";
 import { manifest, money, shortTime } from "../utils";
+import { DeliverySplit } from "./DeliverySplit";
 
 export function MyRuns({
   hubs,
@@ -25,8 +26,7 @@ export function MyRuns({
   return (
     <>
       <div className="sectionTitle">
-        <span className="eyebrow">ALL YOUR FOOD RUNS</span>
-        <h1>Your table, together.</h1>
+        <h1>My runs</h1>
         <p>Track your reservations and manage the runs you host.</p>
       </div>
       <h2>Your reservations</h2>
@@ -48,10 +48,16 @@ export function MyRuns({
               <p>
                 Items estimate: {money(o.items_total_price)}
                 <br />
-                Current delivery share: {money(h.current_split_fee)}
-                <br />
                 Cutoff: {shortTime(h.cutoff_time)}
               </p>
+              {o.order_status === "CANCELLED" ? (
+                <p className="fine">
+                  Reservation cancelled. You are no longer in the delivery
+                  split.
+                </p>
+              ) : (
+                <DeliverySplit hub={h} compact />
+              )}
               {h.status === "ARRIVED" && o.order_status === "RESERVED" && (
                 <div className="banner success">
                   Food has arrived. Collect at the pickup point.
@@ -136,13 +142,10 @@ function HostManifest({
             {hub.void_deck_notes} · {shortTime(hub.cutoff_time)}
           </p>
         </div>
-        <strong>
-          {hub.participant_count}/{hub.max_participants} people ·{" "}
-          {money(hub.current_split_fee)} each
-        </strong>
       </div>
+      <DeliverySplit hub={hub} />
       {error && <p role="alert">{error}</p>}
-      {!loaded ? (
+      {hub.status === "CANCELLED" ? null : !loaded ? (
         <p>Loading reservations…</p>
       ) : (
         <>
@@ -215,6 +218,7 @@ function HostManifest({
       )}
       <div className="actions">
         <button
+          hidden={hub.status === "CANCELLED"}
           disabled={!loaded || !!error}
           onClick={() =>
             void action(async () => {

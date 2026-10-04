@@ -11,6 +11,17 @@ export const shortTime = (s: string) =>
     hour: "2-digit",
     minute: "2-digit",
   }).format(new Date(s));
+// Forecast only. The database remains authoritative for the current split.
+export function deliveryEstimate(fee: number, people: number) {
+  if (
+    !Number.isFinite(fee) ||
+    fee < 0 ||
+    !Number.isInteger(people) ||
+    people < 1
+  )
+    return null;
+  return Math.round((fee * 100) / people) / 100;
+}
 export function distanceMeters(
   aLat: number,
   aLng: number,

@@ -2,7 +2,14 @@ import { useState } from "react";
 import { Plus, X, MapPin, ArrowRight, Flag } from "lucide-react";
 import { client, rpc } from "../api";
 import type { Action, CartItem, Hub, SubOrder } from "../types";
-import { canJoin, shortTime, money, validateItems } from "../utils";
+import {
+  canJoin,
+  shortTime,
+  money,
+  validateItems,
+  deliveryEstimate,
+} from "../utils";
+import { DeliverySplit } from "./DeliverySplit";
 
 export function Reservation({
   hub,
@@ -36,8 +43,8 @@ export function Reservation({
       <span className="status">{hub.status}</span>
       <h2>{hub.merchant.name}</h2>
       <p>
-        Hosted by {hub.host_name} · {hub.participant_count}/
-        {hub.max_participants} people
+        Hosted by {hub.host_name} · {hub.participant_count} joined ·{" "}
+        {Math.max(0, hub.max_participants - hub.participant_count)} spots left
       </p>
       <div className="infoGrid">
         <span>Pickup</span>
@@ -48,9 +55,8 @@ export function Reservation({
         </strong>
         <span>Cutoff</span>
         <strong>{shortTime(hub.cutoff_time)}</strong>
-        <span>Current delivery share</span>
-        <strong>{money(hub.current_split_fee)}</strong>
       </div>
+      <DeliverySplit hub={hub} />
       <a
         className="textLink"
         href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(hub.pickup_latitude + "," + hub.pickup_longitude)}`}
@@ -146,6 +152,24 @@ export function Reservation({
               {money(items.reduce((s, i) => s + i.qty * i.price, 0))}
             </strong>
           </p>
+          {canJoin(hub) && (
+            <p className="joinEstimate">
+              Delivery estimate after you join:{" "}
+              <strong>
+                {money(
+                  deliveryEstimate(
+                    hub.base_delivery_fee,
+                    hub.participant_count + 1,
+                  )!,
+                )}
+              </strong>
+              <br />
+              <small>
+                Shared by {hub.participant_count + 1} people, including you and
+                the host. This can change before ordering.
+              </small>
+            </p>
+          )}
           <button
             className="primary"
             disabled={busy || !hasProfile || !canJoin(hub)}
