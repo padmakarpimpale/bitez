@@ -234,6 +234,15 @@ export function RunChat({
           </span>
         </div>
       </header>
+      <details className="mobileRunDetails">
+        <summary>
+          <MapPin size={16} /> Pickup, cutoff & delivery share
+        </summary>
+        <p>{hub.void_deck_notes}</p>
+        <p>Order cutoff: {shortTime(hub.cutoff_time)}</p>
+        <DeliverySplit hub={hub} />
+        {hub.meal_note && <p>Optional shared meal: {hub.meal_note}</p>}
+      </details>
       <div className="roomLayout">
         <section className="chatPane">
           <div className="roomTabs">

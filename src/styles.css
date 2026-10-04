@@ -1292,6 +1292,9 @@ dialog.roomModal {
 .roomConnection i.connected {
   background: #3e8756;
 }
+.mobileRunDetails {
+  display: none;
+}
 .roomLayout {
   display: grid;
   grid-template-columns: minmax(0, 1fr) 285px;
@@ -1670,6 +1673,25 @@ dialog.roomModal {
   }
   .roomDetails {
     display: none;
+  }
+  .mobileRunDetails {
+    display: block;
+    padding: 12px 18px;
+    background: var(--paper, #fffaf5);
+    border-bottom: 1px solid var(--line);
+  }
+  .mobileRunDetails summary {
+    cursor: pointer;
+    font-weight: 650;
+    font-size: 13px;
+  }
+  .mobileRunDetails summary svg {
+    vertical-align: middle;
+    margin-right: 5px;
+  }
+  .mobileRunDetails > p {
+    font-size: 13px;
+    margin: 12px 0;
   }
   .roomHeading {
     padding: 18px;
