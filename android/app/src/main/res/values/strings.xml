@@ -1,0 +1,11 @@
+<resources>
+    <string name="app_name">Bitez</string>
+    <string name="brand" translatable="false">bitez.</string>
+    <string name="read_terms">Read community terms</string>
+    <string name="privacy_deletion">Privacy &amp; account deletion</string>
+    <string name="terms_agreement">I agree to the community terms and have read the privacy policy.</string>
+    <string name="reconnect_heading">Let’s reconnect</string>
+    <string name="reconnect_body">Check your connection and try again. If the problem continues, open Bitez in your browser or update Android System WebView.</string>
+    <string name="retry">Try again</string>
+    <string name="open_browser">Open in browser</string>
+</resources>

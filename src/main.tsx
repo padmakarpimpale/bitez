@@ -242,6 +242,22 @@ function App() {
     setLoginTarget(v);
     go("account");
   };
+  useEffect(() => {
+    const back = (event: Event) => {
+      if (chatHub) {
+        event.preventDefault();
+        setChatHub(null);
+      } else if (selected) {
+        event.preventDefault();
+        setSelected(null);
+      } else if (view !== "discover") {
+        event.preventDefault();
+        go("discover");
+      }
+    };
+    window.addEventListener("bitez:back", back);
+    return () => window.removeEventListener("bitez:back", back);
+  }, [chatHub, selected, view]);
   return (
     <main>
       <header className="topbar">
