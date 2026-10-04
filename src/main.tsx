@@ -24,7 +24,7 @@ import {
 } from "./api";
 import { supabase } from "./supabase";
 import type { Action, Hub, Location, Profile, SubOrder } from "./types";
-import { AREAS, canJoin, money, shortTime } from "./utils";
+import { AREAS, canJoin, shortTime } from "./utils";
 import { currentLocation } from "./location";
 import "./styles.css";
 type View = "discover" | "host" | "orders" | "account" | "privacy" | "terms";
@@ -34,6 +34,7 @@ import { Account } from "./components/Account";
 import { Host } from "./components/Host";
 import { Reservation } from "./components/Reservation";
 import { MyRuns } from "./components/MyRuns";
+import { DeliverySplit } from "./components/DeliverySplit";
 import { Legal } from "./components/Legal";
 
 function App() {
@@ -232,15 +233,6 @@ function App() {
               {label}
             </button>
           ))}
-          <div className="navNote">
-            <strong>
-              A little closer.
-              <br />A little cheaper.
-            </strong>
-            <p>
-              Collect together at a public pickup point in your neighbourhood.
-            </p>
-          </div>
         </nav>
         <section className="workspace">
           {error && (
@@ -327,10 +319,7 @@ function App() {
               {view === "discover" && (
                 <>
                   <div className="sectionTitle">
-                    <span className="eyebrow">
-                      YOUR NEIGHBOURHOOD, ONE ORDER
-                    </span>
-                    <h1>Find your next bite.</h1>
+                    <h1>Food runs near you</h1>
                     <p>
                       Join a nearby food run. Share the delivery fee. Collect
                       together.
@@ -459,15 +448,16 @@ function App() {
                               </span>
                               <span>
                                 <Users size={15} />
-                                {h.participant_count}/{h.max_participants}{" "}
-                                people
+                                {h.participant_count} joined ·{" "}
+                                {Math.max(
+                                  0,
+                                  h.max_participants - h.participant_count,
+                                )}{" "}
+                                spots left
                               </span>
                             </div>
                             <div className="cardBottom">
-                              <span>
-                                <small>Current delivery share</small>
-                                <strong>{money(h.current_split_fee)}</strong>
-                              </span>
+                              <DeliverySplit hub={h} compact />
                               <span className="joinLink">
                                 View run <ArrowRight size={18} />
                               </span>

@@ -2,7 +2,13 @@ import { useState, lazy, Suspense } from "react";
 import { Navigation, ArrowRight } from "lucide-react";
 import { rpc } from "../api";
 import type { Action, Location } from "../types";
-import { AREAS, inSingapore, localInputTime } from "../utils";
+import {
+  AREAS,
+  inSingapore,
+  localInputTime,
+  deliveryEstimate,
+  money,
+} from "../utils";
 import { currentLocation } from "../location";
 const LocationPicker = lazy(() =>
   import("../LocationPicker").then((m) => ({ default: m.LocationPicker })),
@@ -20,7 +26,13 @@ export function Host({
   onDone: () => void;
 }) {
   const [point, setPoint] = useState<Location>(AREAS[0]),
-    [picked, setPicked] = useState(false);
+    [picked, setPicked] = useState(false),
+    [fee, setFee] = useState("6"),
+    [capacity, setCapacity] = useState("6");
+  const fullShare =
+    fee !== "" && capacity !== ""
+      ? deliveryEstimate(Number(fee), Number(capacity))
+      : null;
   const pick = (p: Location) => {
     setPoint(p);
     setPicked(true);
@@ -50,8 +62,7 @@ export function Host({
         });
       }}
     >
-      <span className="eyebrow">YOU ORDER. EVERYONE SAVES.</span>
-      <h1>Start a food run.</h1>
+      <h1>Host a food run</h1>
       <p>
         You’ll place the combined order and arrange collection. Choose a public
         ground-floor pickup point.
@@ -84,7 +95,8 @@ export function Host({
             min={0}
             max={200}
             step="0.01"
-            defaultValue={6}
+            value={fee}
+            onChange={(e) => setFee(e.target.value)}
             required
           />
         </label>
@@ -95,10 +107,29 @@ export function Host({
             type="number"
             min={2}
             max={50}
-            defaultValue={10}
+            value={capacity}
+            onChange={(e) => setCapacity(e.target.value)}
             required
           />
         </label>
+      </div>
+      {fullShare !== null &&
+        Number(capacity) >= 2 &&
+        Number(capacity) <= 50 &&
+        Number(fee) <= 200 && (
+          <div className="hostSplitPreview" aria-live="polite">
+            <strong>
+              {money(fullShare)} delivery each if all {capacity} people join
+            </strong>
+            <p>
+              {money(Number(fee))} total ÷ {capacity} people, including you.
+              Your run starts with just you, so the initial share is{" "}
+              {money(Number(fee))}. It goes down as neighbours join.
+            </p>
+          </div>
+        )}
+      <h2 className="formSectionTitle">Where to collect</h2>
+      <div className="formGrid">
         <label>
           Pickup postal code
           <input
@@ -152,32 +183,40 @@ export function Host({
       <Suspense fallback={<div className="map empty">Loading pickup map…</div>}>
         <LocationPicker value={point} onChange={pick} />
       </Suspense>
-      <div className="formGrid">
-        <label>
-          Pickup latitude
-          <input
-            type="number"
-            step="any"
-            min={1.15}
-            max={1.5}
-            value={point.lat}
-            onChange={(e) => pick({ ...point, lat: Number(e.target.value) })}
-            required
-          />
-        </label>
-        <label>
-          Pickup longitude
-          <input
-            type="number"
-            step="any"
-            min={103.6}
-            max={104.1}
-            value={point.lng}
-            onChange={(e) => pick({ ...point, lng: Number(e.target.value) })}
-            required
-          />
-        </label>
-      </div>
+      <details
+        className="coordinateDetails"
+        onInvalidCapture={(e) => {
+          e.currentTarget.open = true;
+        }}
+      >
+        <summary>Enter pickup coordinates manually</summary>
+        <div className="formGrid">
+          <label>
+            Pickup latitude
+            <input
+              type="number"
+              step="any"
+              min={1.15}
+              max={1.5}
+              value={point.lat}
+              onChange={(e) => pick({ ...point, lat: Number(e.target.value) })}
+              required
+            />
+          </label>
+          <label>
+            Pickup longitude
+            <input
+              type="number"
+              step="any"
+              min={103.6}
+              max={104.1}
+              value={point.lng}
+              onChange={(e) => pick({ ...point, lng: Number(e.target.value) })}
+              required
+            />
+          </label>
+        </div>
+      </details>
       <label className="checkbox">
         <input type="checkbox" required />
         I’ll arrange this order, share final costs with participants at pickup,
