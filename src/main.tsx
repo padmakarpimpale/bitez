@@ -21,6 +21,7 @@ import {
   getManagedHubs,
   message,
   rpc,
+  getRun,
 } from "./api";
 import { supabase } from "./supabase";
 import type { Action, Hub, Location, Profile, SubOrder } from "./types";
@@ -36,6 +37,7 @@ import { Reservation } from "./components/Reservation";
 import { MyRuns } from "./components/MyRuns";
 import { DeliverySplit } from "./components/DeliverySplit";
 import { Legal } from "./components/Legal";
+import { RunChat } from "./components/RunChat";
 
 function App() {
   const [session, setSession] = useState<Session | null>(null),
@@ -55,6 +57,12 @@ function App() {
     [myHubs, setMyHubs] = useState<Hub[]>([]),
     [hubs, setHubs] = useState<Hub[]>([]),
     [selected, setSelected] = useState<string | null>(null);
+  const [chatHub, setChatHub] = useState<Hub | null>(null),
+    [invitedHub, setInvitedHub] = useState<Hub | null>(null);
+  const inviteId = useRef(
+    new URLSearchParams(window.location.search).get("run"),
+  );
+  const [loginTarget, setLoginTarget] = useState<View>("discover");
   const [location, setLocation] = useState<Location>(AREAS[0]),
     [radius, setRadius] = useState(2000),
     [query, setQuery] = useState(""),
@@ -114,6 +122,8 @@ function App() {
       setMyHubs([]);
       setHubs([]);
       setSelected(null);
+      setChatHub(null);
+      setInvitedHub(null);
       return;
     }
     let active = true;
@@ -178,16 +188,59 @@ function App() {
       document.removeEventListener("visibilitychange", refresh);
     };
   }, []);
-  const selectedHub = hubs.find((h) => h.id === selected);
+  useEffect(() => {
+    if (!user || !inviteId.current) return;
+    const id = inviteId.current;
+    if (!/^[0-9a-f-]{36}$/i.test(id)) {
+      inviteId.current = null;
+      return;
+    }
+    let active = true;
+    void getRun(id)
+      .then((h) => {
+        if (active) {
+          setInvitedHub(h);
+          setSelected(h.id);
+          setView("discover");
+          inviteId.current = null;
+        }
+      })
+      .catch((e) => {
+        if (active) {
+          setError(message(e));
+          inviteId.current = null;
+        }
+      });
+    return () => {
+      active = false;
+    };
+  }, [user]);
+  const selectedHub =
+    hubs.find((h) => h.id === selected) ??
+    (invitedHub?.id === selected ? invitedHub : undefined);
+  const openChat = (hub: Hub) => {
+    setSelected(null);
+    setChatHub(hub);
+  };
   const go = (v: View) => {
     setView(v);
     window.history.replaceState(
       null,
       "",
-      v === "privacy" ? "/privacy" : v === "terms" ? "/terms" : "/",
+      v === "privacy"
+        ? "/privacy"
+        : v === "terms"
+          ? "/terms"
+          : inviteId.current
+            ? `/?run=${encodeURIComponent(inviteId.current)}`
+            : "/",
     );
     setError("");
     setNotice("");
+  };
+  const requestAccess = (v: View) => {
+    setLoginTarget(v);
+    go("account");
   };
   return (
     <main>
@@ -206,6 +259,14 @@ function App() {
           </span>
         </button>
         <div className="headerActions">
+          {!user && (
+            <nav className="guestHeaderNav" aria-label="Explore Bitez">
+              <button onClick={() => requestAccess("discover")}>
+                Find food runs
+              </button>
+              <button onClick={() => requestAccess("host")}>Host a run</button>
+            </nav>
+          )}
           <span className="pilot">Community pilot</span>
           <button onClick={() => go("account")}>
             <User size={17} />
@@ -213,7 +274,7 @@ function App() {
           </button>
         </div>
       </header>
-      <div className="shell">
+      <div className={`shell${!user ? " guest" : ""}`}>
         <nav className="sidebar" aria-label="Main navigation">
           {(
             [
@@ -227,7 +288,9 @@ function App() {
               key={v}
               aria-current={view === v ? "page" : undefined}
               className={view === v ? "active" : ""}
-              onClick={() => go(v)}
+              onClick={() =>
+                !user && v !== "account" ? requestAccess(v) : go(v)
+              }
             >
               <Icon size={19} />
               {label}
@@ -302,10 +365,24 @@ function App() {
                 notify={setNotice}
               />
             ) : (
-              <Auth busy={busy} action={action} notify={setNotice} />
+              <Auth
+                busy={busy}
+                action={action}
+                notify={setNotice}
+                onSignedIn={() => go(loginTarget)}
+              />
             )
           ) : !user ? (
-            <Welcome onSignIn={() => go("account")} />
+            <Welcome
+              initialArea={Math.max(0, AREAS.findIndex((area) => area.label === location.label))}
+              onSignIn={() => requestAccess("discover")}
+              onHost={() => requestAccess("host")}
+              onChooseArea={(index) => {
+                setLocation(AREAS[index]);
+                setOffset(0);
+                requestAccess("discover");
+              }}
+            />
           ) : (
             <>
               {!profile && (
@@ -435,6 +512,11 @@ function App() {
                             </div>
                             <h2>{h.merchant.name}</h2>
                             <p>{h.void_deck_notes}</p>
+                            {h.meal_note && (
+                              <span className="mealTag">
+                                Open to eating together
+                              </span>
+                            )}
                             <div className="hostLine">
                               <span className="avatar">
                                 {h.host_name?.charAt(0).toUpperCase()}
@@ -517,6 +599,7 @@ function App() {
                         busy={busy}
                         hasProfile={!!profile}
                         action={action}
+                        onOpenChat={openChat}
                         onDone={() => {
                           setSelected(null);
                           setNotice(
@@ -533,9 +616,12 @@ function App() {
                   busy={busy}
                   hasProfile={!!profile}
                   action={action}
-                  onDone={() => {
+                  onDone={(id) => {
                     setView("orders");
                     setNotice("Your run is live. Neighbours can now find it.");
+                    void getRun(id)
+                      .then(openChat)
+                      .catch((e) => setError(message(e)));
                   }}
                 />
               )}
@@ -548,6 +634,7 @@ function App() {
                   action={action}
                   version={version}
                   notify={setNotice}
+                  onOpenChat={openChat}
                 />
               )}
             </>
@@ -561,6 +648,24 @@ function App() {
               <button onClick={() => go("terms")}>Community terms</button>
             </div>
           </footer>
+          {user && chatHub && (
+            <Modal onClose={() => setChatHub(null)} wide>
+              <button
+                className="close"
+                autoFocus
+                aria-label="Close group chat"
+                onClick={() => setChatHub(null)}
+              >
+                <X />
+              </button>
+              <RunChat
+                key={`${chatHub.id}:${user}`}
+                initialHub={chatHub}
+                user={user}
+                onUpdate={() => setVersion((v) => v + 1)}
+              />
+            </Modal>
+          )}
         </section>
       </div>
     </main>
@@ -569,9 +674,11 @@ function App() {
 function Modal({
   children,
   onClose,
+  wide = false,
 }: {
   children: React.ReactNode;
   onClose: () => void;
+  wide?: boolean;
 }) {
   const ref = useRef<HTMLDialogElement>(null);
   useEffect(() => {
@@ -587,8 +694,8 @@ function Modal({
   return (
     <dialog
       ref={ref}
-      className="panel modal"
-      aria-label="Run details"
+      className={`panel modal${wide ? " roomModal" : ""}`}
+      aria-label={wide ? "Food run group chat" : "Run details"}
       onCancel={(e) => {
         e.preventDefault();
         onClose();

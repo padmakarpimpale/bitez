@@ -4,6 +4,10 @@
 
 The implementation removes the original local-only demo architecture and broad profile/order access policies. Database tests cover profile/order privacy, RPC ownership, duplicates, capacity, server totals and fee split, expired/locked runs, cancellation, host-only state transitions, anonymous rejection, discovery and collection. Domain tests cover coordinate validation, join eligibility, item validation, manifest aggregation and local datetime input. Production build and npm dependency audit are required checks. These checks are not a penetration test or a guarantee of zero vulnerabilities.
 
+## Run-room release
+
+Each run has a member-only chat after joining. Neighbours may join before selecting items, then save their order before the cutoff. The host sees unfinished reservations and must resolve them before locking. Host announcements, message reporting/removal, idempotent sends, per-user limits, shareable authenticated invites and optional public shared-meal invitations are implemented. Actual WebSocket delivery and denial to a nonmember should be verified when deploying to a new project. No background notifications, automated moderation, or automatic 30-day database purge are provided. The 30-day chat window limits access; stored history is removed through account/run deletion.
+
 ## Before public launch
 
 1. Verify the deployed Vercel URL with production backend variables. Test two real verified accounts on separate devices: host a run, locate/search it, join, refresh both devices, cancel, lock, arrive and collect. Test denied GPS, unavailable tiles, an offline request, email confirmation and password recovery.
@@ -12,7 +16,7 @@ The implementation removes the original local-only demo architecture and broad p
 4. Set an operational owner and daily report-review process. Reports are stored in `public.safety_reports`; only reporters can read their own reports through the app. Review through the Supabase dashboard with owner access. Implement administrative resolution, suspension and run removal before broad user-generated-content release. A report button alone does not constitute active moderation.
 5. Establish backup/restore procedures, uptime and error monitoring, retention/deletion policy, support response targets and load/concurrency testing. The restored free project can pause again; no plan upgrade or paid commitment was made.
 6. Review the pilot terms, costs and privacy text for the actual business. If collecting advance payment later, use a real payment provider and server-side idempotent payment/order reconciliation; do not treat editable price estimates as merchant quotes.
-7. Confirm a real pickup workflow and how hosts communicate delays without exposing personal phone numbers. Current arrival/status updates refresh while the app is foregrounded, typically every 20 seconds; there is no background push delivery guarantee.
+7. Confirm a real pickup workflow and how hosts communicate delays without exposing personal phone numbers. Run-room messages and status updates use Supabase Realtime with a five-second foreground fallback; general run lists also refresh every 20 seconds; there is no background push delivery guarantee.
 8. App code is a shared React/Vite web client and a Supabase database API. Repository rename and hosting configuration must be checked together so the Git integration continues to deploy the intended branch.
 
 ## Android wrapper plan

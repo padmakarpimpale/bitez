@@ -23,7 +23,7 @@ export function Host({
   busy: boolean;
   hasProfile: boolean;
   action: Action;
-  onDone: () => void;
+  onDone: (id: string) => void;
 }) {
   const [point, setPoint] = useState<Location>(AREAS[0]),
     [picked, setPicked] = useState(false),
@@ -48,7 +48,7 @@ export function Host({
             throw new Error(
               "Select your exact public pickup point on the map.",
             );
-          await rpc("create_run", {
+          const id = await rpc("create_social_run", {
             p_restaurant: String(f.get("restaurant")).trim(),
             p_pickup: String(f.get("pickup")).trim(),
             p_postal: String(f.get("postal")),
@@ -57,8 +57,9 @@ export function Host({
             p_cutoff: new Date(String(f.get("cutoff"))).toISOString(),
             p_fee: Number(f.get("fee")),
             p_capacity: Number(f.get("capacity")),
+            p_meal_note: String(f.get("meal_note") ?? ""),
           });
-          onDone();
+          onDone(id);
         });
       }}
     >
@@ -221,6 +222,18 @@ export function Host({
         <input type="checkbox" required />
         I’ll arrange this order, share final costs with participants at pickup,
         and use a safe public collection point.
+      </label>
+      <label className="mealInviteField">
+        Invite people to eat together (optional)
+        <input
+          name="meal_note"
+          maxLength={160}
+          placeholder="e.g. Stay for lunch at the public picnic tables, 12:30 pm"
+        />
+        <small>
+          Leave blank for pickup only. Use a public place; neighbours can opt in
+          through chat.
+        </small>
       </label>
       <p className="fine">
         Delivery shares are estimates and change as people join or cancel. No

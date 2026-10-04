@@ -1,9 +1,10 @@
 import { useState, useEffect } from "react";
-import { Copy } from "lucide-react";
-import { client, rpc, getManifest, message } from "../api";
-import type { Action, Hub, SubOrder } from "../types";
+import { Copy, MessageCircle } from "lucide-react";
+import { client, rpc, getManifest, getHostCart, message } from "../api";
+import type { Action, Hub, SubOrder, CartItem } from "../types";
 import { manifest, money, shortTime } from "../utils";
 import { DeliverySplit } from "./DeliverySplit";
+import { ShareRun } from "./ShareRun";
 
 export function MyRuns({
   hubs,
@@ -13,6 +14,7 @@ export function MyRuns({
   action,
   version,
   notify,
+  onOpenChat,
 }: {
   hubs: Hub[];
   orders: SubOrder[];
@@ -21,6 +23,7 @@ export function MyRuns({
   action: Action;
   version: number;
   notify: (s: string) => void;
+  onOpenChat: (hub: Hub) => void;
 }) {
   const hosted = hubs.filter((h) => h.host_id === user);
   return (
@@ -44,7 +47,11 @@ export function MyRuns({
               </span>
               <h3>{h.merchant.name}</h3>
               <p>{h.void_deck_notes}</p>
-              <p>{o.cart_items.map((i) => `${i.qty}× ${i.name}`).join(", ")}</p>
+              <p>
+                {o.cart_items.length
+                  ? o.cart_items.map((i) => `${i.qty}× ${i.name}`).join(", ")
+                  : "Still choosing food. Save your items in the group’s My order tab."}
+              </p>
               <p>
                 Items estimate: {money(o.items_total_price)}
                 <br />
@@ -79,6 +86,12 @@ export function MyRuns({
                   </button>
                 )}
               <p className="fine">Host: {h.host_name}</p>
+              {o.order_status !== "CANCELLED" && (
+                <button className="primary" onClick={() => onOpenChat(h)}>
+                  <MessageCircle size={17} />
+                  Group chat & my order
+                </button>
+              )}
             </div>
           );
         })}
@@ -93,6 +106,7 @@ export function MyRuns({
           busy={busy}
           action={action}
           notify={notify}
+          onOpenChat={onOpenChat}
         />
       ))}
     </>
@@ -104,23 +118,27 @@ function HostManifest({
   busy,
   action,
   notify,
+  onOpenChat,
 }: {
   hub: Hub;
   version: number;
   busy: boolean;
   action: Action;
   notify: (s: string) => void;
+  onOpenChat: (hub: Hub) => void;
 }) {
   const [orders, setOrders] = useState<SubOrder[]>([]),
+    [hostCart, setHostCart] = useState<CartItem[]>([]),
     [error, setError] = useState(""),
     [loaded, setLoaded] = useState(false),
     [cancel, setCancel] = useState(false);
   useEffect(() => {
     let active = true;
-    getManifest(hub.id)
-      .then((o) => {
+    Promise.all([getManifest(hub.id), getHostCart(hub.id)])
+      .then(([o, cart]) => {
         if (active) {
           setOrders(o);
+          setHostCart(cart);
           setError("");
           setLoaded(true);
         }
@@ -149,20 +167,35 @@ function HostManifest({
         <p>Loading reservations…</p>
       ) : (
         <>
-          <h3>Combined items from neighbours</h3>
+          <h3>Combined restaurant order</h3>
           <p className="fine">
-            Add your own order when placing the final restaurant order. You
-            already count in the delivery split.
+            Includes saved neighbour items and your own saved order. You already
+            count in the delivery split.
+            {!hostCart.length &&
+              " Add your own items in the group’s My order tab, or include them yourself when placing the restaurant order."}
           </p>
           <div className="manifestRows">
-            {manifest(orders).map((i) => (
+            {manifest([
+              ...orders,
+              { cart_items: hostCart, order_status: "RESERVED" } as SubOrder,
+            ]).map((i) => (
               <div key={i.name}>
                 <strong>{i.qty}×</strong>
                 <span>{i.name}</span>
               </div>
             ))}
           </div>
-          {!manifest(orders).length && <p>No active reservations yet.</p>}
+          {orders.some(
+            (o) => o.order_status === "RESERVED" && !o.cart_items.length,
+          ) && (
+            <div className="banner">
+              Some neighbours are still choosing food. Ask them in chat to save
+              an order before you lock the run.
+            </div>
+          )}
+          {!manifest(orders).length && !hostCart.length && (
+            <p>No saved food items yet.</p>
+          )}
           <details>
             <summary>Participant orders</summary>
             {orders
@@ -194,9 +227,32 @@ function HostManifest({
                     Block from future runs
                   </button>
                   <p>
-                    {o.cart_items.map((i) => `${i.qty}× ${i.name}`).join(", ")}{" "}
+                    {o.cart_items.length
+                      ? o.cart_items
+                          .map((i) => `${i.qty}× ${i.name}`)
+                          .join(", ")
+                      : "Still choosing"}{" "}
                     · {money(o.items_total_price)} estimate · {o.order_status}
                   </p>
+                  {!o.cart_items.length &&
+                    o.order_status === "RESERVED" &&
+                    hub.status === "OPEN" && (
+                      <button
+                        disabled={busy}
+                        onClick={() =>
+                          void action(async () => {
+                            await rpc("remove_unready_reservation", {
+                              p_order: o.id,
+                            });
+                            notify(
+                              "Unfinished reservation removed; their chat access has ended.",
+                            );
+                          })
+                        }
+                      >
+                        Remove unfinished reservation
+                      </button>
+                    )}
                   {hub.status === "ARRIVED" &&
                     o.order_status === "RESERVED" && (
                       <button
@@ -217,6 +273,15 @@ function HostManifest({
         </>
       )}
       <div className="actions">
+        {hub.status !== "CANCELLED" && (
+          <>
+            <button className="primary" onClick={() => onOpenChat(hub)}>
+              <MessageCircle size={17} />
+              Open group chat
+            </button>
+            <ShareRun hub={hub} />
+          </>
+        )}
         <button
           hidden={hub.status === "CANCELLED"}
           disabled={!loaded || !!error}
@@ -224,7 +289,13 @@ function HostManifest({
             void action(async () => {
               await navigator.clipboard.writeText(
                 `Bitez run: ${hub.merchant.name}\nPickup: ${hub.void_deck_notes}\n${manifest(
-                  orders,
+                  [
+                    ...orders,
+                    {
+                      cart_items: hostCart,
+                      order_status: "RESERVED",
+                    } as SubOrder,
+                  ],
                 )
                   .map((i) => `${i.qty}x ${i.name}`)
                   .join("\n")}`,
@@ -239,7 +310,13 @@ function HostManifest({
         {hub.status === "OPEN" && (
           <button
             className="primary"
-            disabled={busy}
+            disabled={
+              busy ||
+              !loaded ||
+              orders.some(
+                (o) => o.order_status === "RESERVED" && !o.cart_items.length,
+              )
+            }
             onClick={() =>
               void action(async () => {
                 await rpc("set_run_status", {

@@ -32,8 +32,20 @@ export type Hub = {
   pickup_postal_code: string;
   max_participants: number;
   participant_count: number;
+  meal_note?: string;
   distance?: number;
 };
 export type Location = { lat: number; lng: number; label: string };
 
 export type Action = (work: () => Promise<void>) => Promise<void>;
+export type RunMessage = {
+  id: string;
+  hub_id: string;
+  sender_id: string | null;
+  sender_name: string;
+  body: string;
+  kind: "message" | "announcement" | "system";
+  client_id: string | null;
+  created_at: string;
+  removed_at: string | null;
+};

@@ -795,59 +795,6 @@ dialog.modal::backdrop {
 [hidden] {
   display: none !important;
 }
-.hero {
-  padding: 22px 0 0;
-}
-.locationLabel {
-  display: inline-flex;
-  align-items: center;
-  gap: 7px;
-  color: var(--muted);
-  font-size: 13px;
-  margin-bottom: 22px;
-}
-.hero h1 {
-  font-size: clamp(36px, 4.5vw, 58px);
-  letter-spacing: -2px;
-  line-height: 1.1;
-  margin-bottom: 20px;
-}
-.welcomeIntro > p {
-  max-width: 420px;
-  font-size: 16px;
-}
-.welcomeIntro > .primary {
-  margin: 8px 0 16px;
-}
-.welcomeIntro .welcomeNote {
-  font-size: 13px;
-}
-.welcomeDetails {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 30px;
-  margin: 40px 0 28px;
-  padding: 26px 0;
-  border-top: 1px solid var(--line);
-  border-bottom: 1px solid var(--line);
-}
-.welcomeDetails > div {
-  display: flex;
-  gap: 14px;
-}
-.welcomeDetails svg {
-  flex-shrink: 0;
-  color: var(--muted);
-  margin-top: 2px;
-}
-.welcomeDetails strong {
-  font-size: 15px;
-}
-.welcomeDetails p {
-  font-size: 13px;
-  margin: 8px 0 0;
-  max-width: 350px;
-}
 .deliverySplit {
   border: 1px solid var(--line);
   background: #faf9f6;
@@ -946,19 +893,871 @@ dialog.modal::backdrop {
   margin: 8px 0;
 }
 @media (max-width: 540px) {
-  .welcomeDetails {
-    grid-template-columns: 1fr;
-    gap: 22px;
-    margin-top: 28px;
-  }
-  .hero h1 {
-    font-size: 38px;
-  }
   .brand small {
     display: none;
   }
   .brand img {
     width: 36px;
     height: 36px;
+  }
+}
+
+/* Food-first landing page, with navigation and content spanning the viewport. */
+.shell.guest {
+  display: block;
+  max-width: 1320px;
+  padding-top: 30px;
+}
+.shell.guest .sidebar {
+  display: none;
+}
+.guestHeaderNav {
+  display: flex;
+  gap: 8px;
+}
+.guestHeaderNav button {
+  border: 0;
+  background: transparent;
+  font-size: 14px;
+}
+.foodHero {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 38px;
+  align-items: center;
+  padding: 12px 0 28px;
+}
+.heroCopy {
+  padding: 10px 0;
+}
+.landingEyebrow {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 12px;
+  font-weight: 650;
+  color: var(--accent);
+  margin-bottom: 18px;
+}
+.foodHero h1 {
+  font-size: clamp(38px, 4.7vw, 64px);
+  letter-spacing: -2.7px;
+  line-height: 1.07;
+  margin: 0 0 22px;
+}
+.foodHero h1 span {
+  color: var(--accent);
+}
+.heroCopy > p {
+  max-width: 490px;
+  font-size: 16px;
+  line-height: 1.7;
+  margin-bottom: 24px;
+}
+.areaSearch {
+  background: white;
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  padding: 15px;
+  max-width: 530px;
+  box-shadow: 0 4px 20px #30281805;
+}
+.areaSearch label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--muted);
+  font-size: 12px;
+  margin-bottom: 9px;
+}
+.areaSearch > div {
+  display: flex;
+  gap: 10px;
+}
+.areaSearch select {
+  min-width: 0;
+  flex: 1;
+  background: #faf9f6;
+  font-size: 13px;
+}
+.areaSearch button {
+  flex-shrink: 0;
+  font-size: 13px;
+}
+.heroHost {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  margin-top: 12px;
+  font-size: 12px;
+  color: var(--muted);
+  flex-wrap: wrap;
+}
+.heroHost button {
+  background: none;
+  border: 0;
+  padding: 6px 8px;
+  color: var(--accent);
+  font-size: 13px;
+  font-weight: 650;
+}
+.heroBenefits {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  font-size: 12px;
+  color: var(--muted);
+  margin-top: 16px;
+}
+.heroBenefits > span {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+}
+.heroMedia {
+  position: relative;
+  min-width: 0;
+  border-radius: 26px;
+  overflow: hidden;
+  height: 425px;
+  background: #e4c5a6;
+}
+.heroMedia > img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+.foodCaption {
+  position: absolute;
+  bottom: 18px;
+  left: 18px;
+  right: 18px;
+  border: 1px solid #ffffff80;
+  background: #fffdf7ee;
+  padding: 13px 16px;
+  border-radius: 14px;
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+.captionIcon {
+  width: 40px;
+  height: 40px;
+  display: grid;
+  place-items: center;
+  background: #ffe5d4;
+  border-radius: 12px;
+  color: var(--accent);
+}
+.foodCaption strong {
+  display: block;
+  font-size: 14px;
+}
+.foodCaption div > span {
+  display: block;
+  margin-top: 4px;
+  font-size: 12px;
+  color: var(--muted);
+}
+.areaShortcuts {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 9px;
+  padding: 19px 0;
+  border-bottom: 1px solid var(--line);
+}
+.areaShortcuts > span {
+  font-size: 12px;
+  color: var(--muted);
+  margin-right: 6px;
+}
+.areaShortcuts button {
+  font-size: 12px;
+  min-height: 36px;
+  padding: 8px 12px;
+  border-radius: 30px;
+}
+.foodOccasions {
+  margin: 34px 0 28px;
+}
+.occasionHeading {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 15px;
+  margin-bottom: 20px;
+}
+.occasionHeading .landingEyebrow {
+  margin-bottom: 8px;
+  color: var(--muted);
+}
+.occasionHeading h2 {
+  margin-bottom: 0;
+  font-size: 27px;
+}
+.occasionHeading button {
+  border: 0;
+  background: none;
+  color: var(--accent);
+  font-size: 13px;
+}
+.occasionGrid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+}
+.occasionCard {
+  display: block;
+  padding: 23px;
+  text-align: left;
+  border-radius: 18px;
+  background: #f4eee5;
+  border-color: #e8e0d5;
+}
+.occasionCard.work {
+  background: #eeeef7;
+  border-color: #dfdfee;
+}
+.occasionCard.neighbour {
+  background: #f9ece5;
+  border-color: #efdcd2;
+}
+.occasionCard:hover {
+  filter: brightness(0.985);
+  background: #f4eee5;
+}
+.occasionCard.work:hover {
+  background: #eeeef7;
+}
+.occasionCard.neighbour:hover {
+  background: #f9ece5;
+}
+.occasionIcon {
+  display: inline-grid;
+  width: 47px;
+  height: 47px;
+  place-items: center;
+  background: #ffffffa8;
+  border-radius: 14px;
+  margin-bottom: 18px;
+  color: #716043;
+}
+.work .occasionIcon {
+  color: #655485;
+}
+.neighbour .occasionIcon {
+  color: #a55835;
+}
+.occasionCard h3 {
+  font-size: 19px;
+  margin-bottom: 9px;
+}
+.occasionCard p {
+  font-size: 13px;
+  margin: 0 0 20px;
+  line-height: 1.65;
+}
+.occasionCard > span:last-child {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 12px;
+  font-weight: 650;
+}
+.landingNote {
+  display: flex;
+  gap: 13px;
+  align-items: center;
+  border: 1px solid var(--line);
+  padding: 18px 22px;
+  border-radius: 14px;
+  background: #fff;
+}
+.landingNote > svg {
+  flex-shrink: 0;
+  color: var(--accent);
+}
+.landingNote > p {
+  flex: 1;
+  margin: 0;
+  font-size: 13px;
+}
+.landingNote > button {
+  border: 0;
+  flex-shrink: 0;
+  color: var(--accent);
+  font-size: 13px;
+}
+.pilotNote {
+  margin: 20px 0 0;
+  font-size: 11px;
+}
+.mealTag {
+  display: inline-block;
+  padding: 5px 8px;
+  font-size: 11px;
+  color: #865333;
+  background: #fff1e5;
+  border-radius: 6px;
+  margin-bottom: 12px;
+}
+.mealInvitation,
+.decideTogether {
+  background: #fff5ec;
+  border: 1px solid #efd9c8;
+  border-radius: 12px;
+  padding: 15px;
+  margin: 18px 0;
+}
+.mealInvitation strong {
+  font-size: 13px;
+}
+.mealInvitation p {
+  font-size: 13px;
+  margin: 7px 0;
+}
+.decideTogether {
+  display: flex;
+  gap: 12px;
+}
+.decideTogether > svg {
+  flex-shrink: 0;
+  color: var(--accent);
+}
+.decideTogether strong {
+  font-size: 14px;
+}
+.decideTogether p {
+  font-size: 13px;
+  margin: 7px 0 12px;
+}
+.shareInvite {
+  display: grid;
+  gap: 5px;
+}
+.shareInvite small {
+  max-width: 210px;
+  font-size: 11px;
+}
+.mealInviteField {
+  margin: 22px 0;
+}
+.mealInviteField small {
+  font-weight: 400;
+}
+/* The run room: a real conversation with a persistent order and pickup sidebar. */
+dialog.roomModal {
+  max-width: 1040px;
+  padding: 0;
+  overflow: auto;
+}
+.roomHeading {
+  display: flex;
+  gap: 13px;
+  padding: 22px 26px;
+  border-bottom: 1px solid var(--line);
+  align-items: center;
+  padding-right: 62px;
+}
+.roomHeading h2 {
+  margin: 3px 0 6px;
+  font-size: 22px;
+  padding: 0;
+}
+.roomIcon {
+  display: grid;
+  place-items: center;
+  width: 45px;
+  height: 45px;
+  border-radius: 14px;
+  background: #ffe9dc;
+  color: var(--accent);
+  flex-shrink: 0;
+}
+.roomConnection {
+  display: flex;
+  gap: 5px;
+  align-items: center;
+  font-size: 11px;
+  color: var(--muted);
+}
+.roomConnection i {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #a87a43;
+}
+.roomConnection i.connected {
+  background: #3e8756;
+}
+.mobileRunDetails {
+  display: none;
+}
+.roomLayout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 285px;
+}
+.chatPane {
+  min-width: 0;
+}
+.roomTabs {
+  display: flex;
+  border-bottom: 1px solid var(--line);
+  gap: 8px;
+  padding: 9px 18px;
+}
+.roomTabs button {
+  border: 0;
+  background: none;
+  font-size: 13px;
+  border-radius: 8px;
+}
+.roomTabs button.active {
+  color: var(--accent);
+  background: #fff0e6;
+  font-weight: 700;
+}
+.chatPane > .banner {
+  margin: 12px;
+  font-size: 12px;
+}
+.pinnedMessage {
+  display: flex;
+  gap: 9px;
+  padding: 12px 18px;
+  background: #fff8e7;
+  border-bottom: 1px solid #eee2be;
+}
+.pinnedMessage svg {
+  flex-shrink: 0;
+  color: #917126;
+  margin-top: 2px;
+}
+.pinnedMessage strong {
+  font-size: 11px;
+  color: #917126;
+}
+.pinnedMessage p {
+  font-size: 13px;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  color: #544936;
+  margin: 5px 0 0;
+}
+.chatMessages {
+  height: min(40dvh, 360px);
+  min-height: 200px;
+  overflow: auto;
+  padding: 16px 20px;
+  overscroll-behavior: contain;
+  background: #fcfbf8;
+}
+.chatMessage {
+  padding: 12px 14px 6px;
+  border: 1px solid var(--line);
+  background: #fff;
+  border-radius: 13px 13px 13px 3px;
+  margin: 12px 35px 12px 0;
+}
+.chatMessage.mine {
+  margin-left: 35px;
+  margin-right: 0;
+  background: #fbede2;
+  border-color: #ead4c4;
+  border-radius: 13px 13px 3px 13px;
+}
+.messageAuthor {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 9px;
+  font-size: 12px;
+}
+.messageAuthor strong {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+}
+.messageAuthor strong > span {
+  font-size: 9px;
+  color: var(--accent);
+  background: #ffe4d3;
+  padding: 2px 5px;
+  border-radius: 4px;
+}
+.messageAuthor time {
+  color: var(--muted);
+  font-size: 10px;
+  flex-shrink: 0;
+}
+.chatMessage > p {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  margin: 8px 0 2px;
+  color: #38342e;
+  font-size: 14px;
+}
+.chatMessage.removed p {
+  color: var(--muted);
+  font-style: italic;
+}
+.messageTools {
+  display: flex;
+  gap: 6px;
+  justify-content: flex-end;
+}
+.messageTools button {
+  border: 0;
+  background: none;
+  padding: 6px 3px;
+  font-size: 10px;
+  color: var(--muted);
+  min-height: 30px;
+}
+.systemMessage {
+  text-align: center;
+  font-size: 11px;
+  color: #82796c;
+  margin: 13px auto;
+  max-width: 90%;
+}
+.chatComposer {
+  padding: 12px 18px 15px;
+  border-top: 1px solid var(--line);
+  background: #fff;
+}
+.quickReplies {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  margin-bottom: 10px;
+}
+.quickReplies button {
+  font-size: 10px;
+  border-radius: 20px;
+  padding: 6px 9px;
+  min-height: 32px;
+  background: #faf9f6;
+}
+.announceToggle {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 10px;
+  font-size: 11px;
+  color: var(--muted);
+  font-weight: 400;
+}
+.announceToggle input {
+  width: 15px;
+  height: 15px;
+  min-height: 15px;
+}
+.composeRow {
+  display: flex;
+  align-items: flex-end;
+  gap: 8px;
+}
+.composeRow textarea {
+  min-height: 54px;
+  max-height: 130px;
+  font-size: 13px;
+  resize: vertical;
+}
+.composeRow button {
+  height: 48px;
+  width: 48px;
+  padding: 12px;
+  flex-shrink: 0;
+}
+.chatComposer > small {
+  font-size: 10px;
+  display: block;
+  margin-top: 8px;
+  line-height: 1.6;
+}
+.chatClosed {
+  font-size: 12px;
+  padding: 17px;
+  margin: 0;
+  border-top: 1px solid var(--line);
+}
+.chatHint {
+  font-size: 13px;
+}
+.chatEmpty {
+  text-align: center;
+  padding: 30px 12px;
+}
+.chatEmpty svg {
+  color: var(--accent);
+  margin-bottom: 10px;
+}
+.chatEmpty strong {
+  display: block;
+  font-size: 16px;
+}
+.chatEmpty p {
+  font-size: 13px;
+  max-width: 320px;
+  margin: 10px auto;
+}
+.roomDetails {
+  background: #f7f4ef;
+  padding: 22px 20px;
+  border-left: 1px solid var(--line);
+}
+.roomDetails h3 {
+  margin: 18px 0 12px;
+  font-size: 16px;
+}
+.roomDetails > p:not(.fine) {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  font-size: 12px;
+}
+.roomDetails > p > svg {
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+.roomDetails .deliverySplit {
+  background: #fff;
+  font-size: 12px;
+}
+.roomDetails .splitHeadline > strong {
+  font-size: 23px;
+}
+.roomDetails > .fine {
+  font-size: 11px;
+  margin-top: 15px;
+}
+.roomDetails > button {
+  width: 100%;
+  font-size: 12px;
+}
+.orderEditor {
+  padding: 22px;
+}
+.orderEditor h3 {
+  margin-bottom: 12px;
+}
+.orderEditor .actions > strong {
+  font-size: 13px;
+}
+.chatReport {
+  padding: 20px;
+  border-top: 1px solid var(--line);
+  background: white;
+}
+.chatLost {
+  padding: 40px;
+  text-align: center;
+}
+.chatLost h2 {
+  padding: 0;
+}
+.loadOlder {
+  display: flex;
+  margin: 0 auto;
+  min-height: 32px;
+  padding: 6px 12px;
+  font-size: 11px;
+}
+.srOnly {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+.status-cancelled {
+  color: #7c4b45;
+  background: #f7e8e6;
+}
+.status-locked {
+  color: #82672c;
+  background: #faf0d5;
+}
+.status-arrived {
+  color: #346749;
+  background: #e6f1e8;
+}
+@media (max-width: 1100px) {
+  .foodHero {
+    gap: 24px;
+  }
+  .heroMedia {
+    height: 390px;
+  }
+  .foodHero h1 {
+    font-size: 48px;
+  }
+  .areaSearch > div {
+    flex-direction: column;
+  }
+  .roomLayout {
+    grid-template-columns: minmax(0, 1fr) 240px;
+  }
+}
+@media (max-width: 800px) {
+  .shell.guest {
+    padding-bottom: 28px;
+  }
+  .guestHeaderNav {
+    display: none;
+  }
+  .foodHero {
+    grid-template-columns: 1fr;
+    gap: 20px;
+    padding-top: 0;
+  }
+  .heroMedia {
+    height: 310px;
+  }
+  .heroCopy > p {
+    max-width: 100%;
+  }
+  .areaSearch {
+    max-width: none;
+  }
+  .areaSearch > div {
+    flex-direction: row;
+  }
+  .foodHero h1 {
+    font-size: 46px;
+  }
+  .occasionGrid {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+  .occasionCard {
+    padding: 20px;
+  }
+  .occasionCard p {
+    max-width: 500px;
+  }
+  .occasionIcon {
+    width: 42px;
+    height: 42px;
+    margin-bottom: 12px;
+  }
+  .occasionHeading {
+    align-items: flex-start;
+  }
+  .occasionHeading h2 {
+    font-size: 24px;
+  }
+  .occasionHeading button {
+    display: none;
+  }
+  .landingNote {
+    flex-wrap: wrap;
+    padding: 16px;
+  }
+  .landingNote p {
+    flex-basis: calc(100% - 34px);
+  }
+  .landingNote > button {
+    margin-left: 22px;
+  }
+  .roomLayout {
+    grid-template-columns: 1fr;
+  }
+  .roomDetails {
+    display: none;
+  }
+  .mobileRunDetails {
+    display: block;
+    padding: 12px 18px;
+    background: var(--paper, #fffaf5);
+    border-bottom: 1px solid var(--line);
+  }
+  .mobileRunDetails summary {
+    cursor: pointer;
+    font-weight: 650;
+    font-size: 13px;
+  }
+  .mobileRunDetails summary svg {
+    vertical-align: middle;
+    margin-right: 5px;
+  }
+  .mobileRunDetails > p {
+    font-size: 13px;
+    margin: 12px 0;
+  }
+  .roomHeading {
+    padding: 18px;
+    padding-right: 56px;
+  }
+  .chatMessages {
+    height: 40dvh;
+  }
+  .roomModal .close {
+    right: 10px;
+    top: 10px;
+  }
+  .roomHeading h2 {
+    font-size: 19px;
+  }
+  .chatPane {
+    min-width: 0;
+  }
+  .chatMessage {
+    margin-right: 18px;
+  }
+  .chatMessage.mine {
+    margin-left: 18px;
+  }
+}
+@media (max-width: 420px) {
+  .foodHero h1 {
+    font-size: 39px;
+    letter-spacing: -1.8px;
+  }
+  .areaSearch > div {
+    flex-direction: column;
+  }
+  .heroMedia {
+    height: 265px;
+  }
+  .foodCaption {
+    left: 12px;
+    right: 12px;
+    bottom: 12px;
+    padding: 11px;
+  }
+  .foodCaption strong {
+    font-size: 12px;
+  }
+  .heroBenefits {
+    gap: 10px;
+    font-size: 11px;
+  }
+  .chatMessages {
+    padding: 12px;
+  }
+  .chatComposer {
+    padding: 12px;
+  }
+  .roomHeading {
+    gap: 9px;
+  }
+  .roomIcon {
+    width: 36px;
+    height: 36px;
+  }
+  .roomHeading h2 {
+    font-size: 17px;
+  }
+  .orderEditor {
+    padding: 16px;
   }
 }
