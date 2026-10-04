@@ -15,12 +15,14 @@ export function Welcome({
   onSignIn,
   onHost,
   onChooseArea,
+  initialArea,
 }: {
   onSignIn: () => void;
   onHost: () => void;
   onChooseArea: (index: number) => void;
+  initialArea: number;
 }) {
-  const [area, setArea] = useState(0);
+  const [area, setArea] = useState(initialArea);
   return (
     <section className="landing">
       <div className="foodHero">

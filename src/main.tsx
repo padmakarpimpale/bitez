@@ -374,6 +374,7 @@ function App() {
             )
           ) : !user ? (
             <Welcome
+              initialArea={Math.max(0, AREAS.findIndex((area) => area.label === location.label))}
               onSignIn={() => requestAccess("discover")}
               onHost={() => requestAccess("host")}
               onChooseArea={(index) => {
