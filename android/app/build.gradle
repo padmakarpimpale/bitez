@@ -1,0 +1,59 @@
+plugins { id 'com.android.application' }
+
+def releaseKeyPath = System.getenv('BITEZ_KEYSTORE_PATH')
+def releaseStorePassword = System.getenv('BITEZ_KEYSTORE_PASSWORD')
+def releaseKeyAlias = System.getenv('BITEZ_KEY_ALIAS')
+def releaseKeyPassword = System.getenv('BITEZ_KEY_PASSWORD')
+def hasSigning = [releaseKeyPath, releaseStorePassword, releaseKeyAlias, releaseKeyPassword].every { it }
+
+android {
+    namespace 'com.padmakarpimpale.bitez'
+    compileSdk 36
+    defaultConfig {
+        applicationId 'com.padmakarpimpale.bitez'
+        minSdk 26
+        targetSdk 36
+        versionCode 1
+        versionName '1.0.0'
+    }
+    signingConfigs {
+        if (hasSigning) {
+            release {
+                storeFile file(releaseKeyPath)
+                storePassword releaseStorePassword
+                keyAlias releaseKeyAlias
+                keyPassword releaseKeyPassword
+            }
+        }
+    }
+    buildTypes {
+        debug { applicationIdSuffix '.debug'; versionNameSuffix '-debug' }
+        release {
+            if (hasSigning) signingConfig signingConfigs.release
+            minifyEnabled true
+            shrinkResources true
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+    }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+    lint { abortOnError true; checkReleaseBuilds true }
+    buildFeatures { buildConfig true }
+}
+
+// Unsigned bundles are useful in CI, but the launch task must never silently
+// produce an unsigned file or sign production with the public debug key.
+tasks.register('playBundle') {
+    if (hasSigning) dependsOn 'bundleRelease'
+    doLast {
+        if (!hasSigning) throw new GradleException('Set all four BITEZ signing environment variables before building a Play upload.')
+    }
+}
+
+dependencies {
+    implementation 'androidx.activity:activity:1.11.0'
+    implementation 'androidx.webkit:webkit:1.14.0'
+    testImplementation 'junit:junit:4.13.2'
+}

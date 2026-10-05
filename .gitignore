@@ -6,3 +6,12 @@ tsconfig.tsbuildinfo
 .DS_Store
 
 supabase/.temp/
+
+# Android build products and private release signing material
+android/.gradle/
+android/**/build/
+android/local.properties
+*.jks
+*.keystore
+android/keystore.properties
+android/signing.env
