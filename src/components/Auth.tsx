@@ -3,6 +3,11 @@ import { ArrowRight } from "lucide-react";
 import { client } from "../api";
 import { supabase } from "../supabase";
 import { authRedirectUrl } from "../authLinks";
+import {
+  emailValidationError,
+  passwordValidationError,
+} from "../authValidation";
+import { PasswordField } from "./PasswordField";
 import type { Action } from "../types";
 
 export function Auth({
@@ -28,6 +33,12 @@ export function Auth({
         const email = String(f.get("email")).trim(),
           password = String(f.get("password") ?? "");
         void action(async () => {
+          const emailError = emailValidationError(email);
+          if (emailError) throw new Error(emailError);
+          if (mode === "signup") {
+            const passwordError = passwordValidationError(password);
+            if (passwordError) throw new Error(passwordError);
+          }
           if (mode === "login") {
             const { error } = await client().auth.signInWithPassword({
               email,
@@ -77,25 +88,16 @@ export function Auth({
           autoComplete="email"
           maxLength={254}
           required
+          onInput={(event) => {
+            const input = event.currentTarget;
+            input.setCustomValidity(
+              input.value ? (emailValidationError(input.value) ?? "") : "",
+            );
+          }}
         />
       </label>
       {mode !== "reset" && (
-        <label>
-          Password
-          <input
-            name="password"
-            type="password"
-            autoComplete={
-              mode === "signup" ? "new-password" : "current-password"
-            }
-            minLength={mode === "signup" ? 12 : 1}
-            maxLength={128}
-            required
-          />
-          <small>
-            {mode === "signup" ? "Use at least 12 characters." : ""}
-          </small>
-        </label>
+        <PasswordField key={mode} newPassword={mode === "signup"} />
       )}
       {mode === "signup" && (
         <label className="checkbox">
@@ -129,6 +131,8 @@ export function Auth({
               if (!input || !input.reportValidity()) return;
               const email = input.value.trim();
               void action(async () => {
+                const emailError = emailValidationError(email);
+                if (emailError) throw new Error(emailError);
                 const { error } = await client().auth.resend({
                   type: "signup",
                   email,

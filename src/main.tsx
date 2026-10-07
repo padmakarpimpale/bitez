@@ -25,6 +25,8 @@ import {
 } from "./api";
 import { authStorageKey, supabase } from "./supabase";
 import { authLinkError, callbackError, clearCallbackError } from "./authLinks";
+import { passwordValidationError } from "./authValidation";
+import { PasswordField } from "./components/PasswordField";
 import { useIdleSession } from "./useIdleSession";
 import type { Action, Hub, Location, Profile, SubOrder } from "./types";
 import { AREAS, canJoin, shortTime } from "./utils";
@@ -405,6 +407,8 @@ function App() {
                     new FormData(e.currentTarget).get("password"),
                   );
                   void action(async () => {
+                    const passwordError = passwordValidationError(p);
+                    if (passwordError) throw new Error(passwordError);
                     const { error } = await client().auth.updateUser({
                       password: p,
                     });
@@ -415,17 +419,7 @@ function App() {
                 }}
               >
                 <h1>Set a new password</h1>
-                <label>
-                  New password
-                  <input
-                    name="password"
-                    type="password"
-                    minLength={12}
-                    maxLength={128}
-                    autoComplete="new-password"
-                    required
-                  />
-                </label>
+                <PasswordField newPassword label="New password" />
                 <button className="primary" disabled={busy}>
                   Save password
                 </button>
