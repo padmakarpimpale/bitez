@@ -1028,6 +1028,90 @@ dialog.modal::backdrop {
   object-fit: cover;
   display: block;
 }
+.foodCarousel .foodSlide {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  transition: opacity 550ms ease;
+}
+.foodCarousel .foodSlide.active {
+  opacity: 1;
+}
+.carouselToolbar {
+  position: absolute;
+  top: 16px;
+  left: 16px;
+  right: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+.carouselTabs {
+  display: flex;
+  gap: 2px;
+  padding: 3px;
+  border-radius: 24px;
+  background: #fffdf7f2;
+  box-shadow: 0 2px 12px #30281812;
+}
+.carouselTabs button {
+  border: 0;
+  background: transparent;
+  min-height: 38px;
+  padding: 8px 12px;
+  border-radius: 22px;
+  font-size: 12px;
+  color: #45372e;
+}
+.carouselTabs button[aria-current="true"] {
+  background: #b54327;
+  color: #fff;
+}
+.foodCarousel .carouselRotation,
+.foodCarousel .carouselArrow {
+  display: grid;
+  place-items: center;
+  min-width: 44px;
+  min-height: 44px;
+  padding: 0;
+  border: 1px solid #ffffffb3;
+  border-radius: 50%;
+  background: #fffdf7ee;
+  color: #45372e;
+  box-shadow: 0 2px 12px #30281812;
+}
+.foodCarousel .carouselArrow {
+  position: absolute;
+  top: calc(50% - 22px);
+}
+.carouselArrow.previous {
+  left: 14px;
+}
+.carouselArrow.next {
+  right: 14px;
+}
+.foodCarousel button:focus-visible {
+  outline: 3px solid white;
+  outline-offset: 3px;
+  box-shadow: 0 0 0 5px #b54327;
+}
+@media (prefers-reduced-motion: reduce) {
+  .foodCarousel .foodSlide {
+    transition: none;
+  }
+}
+@media (max-width: 420px) {
+  .carouselToolbar {
+    top: 12px;
+    left: 12px;
+    right: 12px;
+  }
+  .carouselTabs button {
+    padding: 8px 9px;
+    font-size: 11px;
+  }
+}
 .foodCaption {
   position: absolute;
   bottom: 18px;

@@ -5,11 +5,11 @@ import {
   MessageCircle,
   GraduationCap,
   Building2,
-  Utensils,
   Plus,
   Users,
 } from "lucide-react";
 import { AREAS } from "../utils";
+import { FoodCarousel } from "./FoodCarousel";
 
 export function Welcome({
   onSignIn,
@@ -84,24 +84,7 @@ export function Welcome({
             </span>
           </div>
         </div>
-        <div className="heroMedia">
-          <img
-            src="/images/shared-lunch.webp"
-            width="1152"
-            height="768"
-            alt="Noodles, chicken rice and vegetables on a shared lunch table"
-            fetchPriority="high"
-          />
-          <div className="foodCaption">
-            <span className="captionIcon">
-              <Utensils size={19} />
-            </span>
-            <div>
-              <strong>Your usual lunch. A new crew.</strong>
-              <span>Find, chat, order, collect.</span>
-            </div>
-          </div>
-        </div>
+        <FoodCarousel />
       </div>
       <div className="areaShortcuts">
         <span>Explore your area</span>
