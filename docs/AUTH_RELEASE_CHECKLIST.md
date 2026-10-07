@@ -44,6 +44,29 @@ so the dashboard change still requires an account administrator.
 - Do not turn off email verification to bypass this problem. Do not put
   credentials or real email tokens in issue bodies, screenshots or logs.
 
+## Password and email validation
+
+Signup and password recovery share a 12–128 character policy requiring an
+uppercase letter, lowercase letter, digit and a supported punctuation symbol.
+The form shows each requirement and lets users reveal the password. Pasting
+and password managers are supported. Passwords are never trimmed. Login does
+not impose the new creation policy on existing accounts. Email checks catch
+format errors; email confirmation proves access to the mailbox.
+
+**Required free server configuration:** in Supabase Authentication settings,
+open the Email provider/password settings. Set minimum password length to 12
+and choose the requirement for uppercase, lowercase, digits and symbols. These
+controls do not require a paid plan. Frontend validation improves feedback but
+can be bypassed; do not describe this policy as enforced by the backend until
+these settings have been saved and a direct weak-password request is rejected.
+Leave leaked-password protection (Pro+) out of this pilot.
+
+The application also limits newly entered passwords to 128 characters. The
+hosted settings above enforce the minimum and composition requirements; the
+client maximum is an input limit, not a configured server maximum.
+
+Reference: https://supabase.com/docs/guides/auth/password-security
+
 ## Pilot session policy
 
 The web app and Android WebView sign out the current device session after
