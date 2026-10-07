@@ -59,6 +59,12 @@ The older `VITE_SUPABASE_ANON_KEY` remains supported if already configured. Verc
 
 In Supabase Auth URL settings, set the production Site URL and allow the exact production and approved preview redirect URLs. Keep email verification enabled. Configure production SMTP, password rules, abuse protection and auth rate limits. Test sign-up verification and password recovery against the actual deployed domain before admitting users.
 
+For the localhost confirmation-link fix and exact dashboard settings, see
+`docs/AUTH_RELEASE_CHECKLIST.md`. This app uses PKCE, so open recovery links in
+the browser which requested them. It also signs out the current device after
+60 minutes without interaction, with a two-minute warning. This is a client
+inactivity feature; it is not server-side session expiry or payment security.
+
 ## Release limits and operations
 
 This is a pilot, not an audited production service. Read `docs/RELEASE.md` for the outstanding launch requirements and Android plan. No card payments, restaurant API, delivery integration, background push notifications or guaranteed moderation are implemented. The host counts in the fee split and can now save their own food items in the run room; saved host items are included in the manifest. Chat remains foreground-only; it does not provide push notifications. Rounding differences are agreed outside the app. Do not promise payments or merchant-confirmed prices.
