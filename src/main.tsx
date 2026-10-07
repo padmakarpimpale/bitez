@@ -23,7 +23,9 @@ import {
   rpc,
   getRun,
 } from "./api";
-import { supabase } from "./supabase";
+import { authStorageKey, supabase } from "./supabase";
+import { authLinkError, callbackError, clearCallbackError } from "./authLinks";
+import { useIdleSession } from "./useIdleSession";
 import type { Action, Hub, Location, Profile, SubOrder } from "./types";
 import { AREAS, canJoin, shortTime } from "./utils";
 import { currentLocation } from "./location";
@@ -62,6 +64,7 @@ function App() {
   const inviteId = useRef(
     new URLSearchParams(window.location.search).get("run"),
   );
+  const authCallbackUrl = useRef(window.location.href);
   const [loginTarget, setLoginTarget] = useState<View>("discover");
   const [location, setLocation] = useState<Location>(AREAS[0]),
     [radius, setRadius] = useState(2000),
@@ -72,25 +75,77 @@ function App() {
   const [recovery, setRecovery] = useState(false),
     [version, setVersion] = useState(0),
     [now, setNow] = useState(Date.now());
-  const user = session?.user.id;
+  const idle = useIdleSession(session, async () => {
+    // Hide private UI immediately, including after a suspended tab resumes.
+    setSession(null);
+    setRecovery(false);
+    setView("account");
+    setError("");
+    setNotice(
+      "You were signed out after 60 minutes without activity. Sign in to continue. Your saved runs and orders are still there.",
+    );
+    if (!supabase) return;
+    const { error } = await supabase.auth.signOut({ scope: "local" });
+    if (error) {
+      // Offline sign-out cannot revoke server refresh tokens. Clear the device
+      // credential anyway; do not leave an idle browser able to reopen it.
+      supabase.auth.stopAutoRefresh();
+      try {
+        window.localStorage.removeItem(authStorageKey);
+      } catch {
+        /* Storage unavailable. */
+      }
+    }
+  });
+  const user = idle.ready ? session?.user.id : undefined;
   useEffect(() => {
     if (!supabase) {
       setAuthLoading(false);
       return;
     }
     let active = true;
-    supabase.auth.getSession().then(({ data, error }) => {
+    const callbackUrl = new URL(authCallbackUrl.current);
+    const linkError = callbackError(callbackUrl);
+    if (linkError) {
+      setError(linkError);
+      setView("account");
+      window.history.replaceState(
+        null,
+        "",
+        clearCallbackError(new URL(callbackUrl)),
+      );
+    }
+    void (async () => {
+      // initialize exposes PKCE callback failures that getSession can hide.
+      const { error: initializationError } = await supabase.auth.initialize();
+      const { data, error } = await supabase.auth.getSession();
       if (active) {
         setSession(data.session);
         setAuthLoading(false);
-        if (error) setError(message(error));
+        if (initializationError || error) {
+          setError(
+            linkError ??
+              (callbackUrl.searchParams.has("code")
+                ? authLinkError(initializationError ?? error)
+                : message(initializationError ?? error)),
+          );
+          if (callbackUrl.searchParams.has("code")) {
+            setView("account");
+            window.history.replaceState(
+              null,
+              "",
+              clearCallbackError(new URL(callbackUrl)),
+            );
+          }
+        }
       }
-    });
+    })();
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((event, next) => {
       setSession(next);
       setAuthLoading(false);
+      if (event === "SIGNED_OUT") setRecovery(false);
       if (event === "PASSWORD_RECOVERY") {
         setRecovery(true);
         setView("account");
@@ -244,7 +299,10 @@ function App() {
   };
   useEffect(() => {
     const back = (event: Event) => {
-      if (chatHub) {
+      if (idle.warningSeconds !== null) {
+        event.preventDefault();
+        idle.staySignedIn();
+      } else if (chatHub) {
         event.preventDefault();
         setChatHub(null);
       } else if (selected) {
@@ -257,7 +315,7 @@ function App() {
     };
     window.addEventListener("bitez:back", back);
     return () => window.removeEventListener("bitez:back", back);
-  }, [chatHub, selected, view]);
+  }, [chatHub, selected, view, idle.warningSeconds]);
   return (
     <main>
       <header className="topbar">
@@ -333,7 +391,7 @@ function App() {
               again later.
             </div>
           )}
-          {authLoading ? (
+          {authLoading || (session && !idle.ready) ? (
             <div className="empty">Checking your session…</div>
           ) : view === "privacy" || view === "terms" ? (
             <Legal page={view} />
@@ -390,7 +448,10 @@ function App() {
             )
           ) : !user ? (
             <Welcome
-              initialArea={Math.max(0, AREAS.findIndex((area) => area.label === location.label))}
+              initialArea={Math.max(
+                0,
+                AREAS.findIndex((area) => area.label === location.label),
+              )}
               onSignIn={() => requestAccess("discover")}
               onHost={() => requestAccess("host")}
               onChooseArea={(index) => {
@@ -684,7 +745,52 @@ function App() {
           )}
         </section>
       </div>
+      {user && idle.warningSeconds !== null && (
+        <SessionWarning
+          seconds={idle.warningSeconds}
+          onContinue={idle.staySignedIn}
+        />
+      )}
     </main>
+  );
+}
+function SessionWarning({
+  seconds,
+  onContinue,
+}: {
+  seconds: number;
+  onContinue: () => void;
+}) {
+  const ref = useRef<HTMLDialogElement>(null);
+  useEffect(() => {
+    const dialog = ref.current;
+    dialog?.showModal();
+    return () => dialog?.close();
+  }, []);
+  return (
+    <dialog
+      ref={ref}
+      className="panel modal"
+      aria-labelledby="session-warning-title"
+      onCancel={(event) => {
+        event.preventDefault();
+        onContinue();
+      }}
+    >
+      <h2 id="session-warning-title">Still here?</h2>
+      <p>
+        Bitez will sign you out in {Math.ceil(seconds / 60)}{" "}
+        {Math.ceil(seconds / 60) === 1 ? "minute" : "minutes"} because you
+        haven’t interacted for a while.
+      </p>
+      <p>
+        Save any unfinished items or messages. Saved runs and orders stay in
+        your account.
+      </p>
+      <button className="primary" autoFocus onClick={onContinue}>
+        Stay signed in
+      </button>
+    </dialog>
   );
 }
 function Modal({

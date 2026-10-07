@@ -1,7 +1,8 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { ArrowRight } from "lucide-react";
 import { client } from "../api";
 import { supabase } from "../supabase";
+import { authRedirectUrl } from "../authLinks";
 import type { Action } from "../types";
 
 export function Auth({
@@ -16,8 +17,10 @@ export function Auth({
   onSignedIn: () => void;
 }) {
   const [mode, setMode] = useState<"login" | "signup" | "reset">("login");
+  const form = useRef<HTMLFormElement>(null);
   return (
     <form
+      ref={form}
       className="panel auth"
       onSubmit={(e) => {
         e.preventDefault();
@@ -31,22 +34,27 @@ export function Auth({
               password,
             });
             if (error) throw error;
+            client().auth.startAutoRefresh();
             onSignedIn();
           } else if (mode === "signup") {
             const { error } = await client().auth.signUp({
               email,
               password,
-              options: { emailRedirectTo: window.location.origin },
-            });
-            if (error) throw error;
-            notify("Check your email to verify your account, then sign in.");
-          } else {
-            const { error } = await client().auth.resetPasswordForEmail(email, {
-              redirectTo: window.location.origin,
+              options: {
+                emailRedirectTo: authRedirectUrl(window.location.origin),
+              },
             });
             if (error) throw error;
             notify(
-              "If an account exists, a password reset link has been sent.",
+              "Check your email to verify your account. Open the link in this browser, then sign in if needed.",
+            );
+          } else {
+            const { error } = await client().auth.resetPasswordForEmail(email, {
+              redirectTo: authRedirectUrl(window.location.origin),
+            });
+            if (error) throw error;
+            notify(
+              "If an account exists, a password reset link has been sent. Open it in this browser.",
             );
           }
         });
@@ -95,6 +103,10 @@ export function Auth({
           Privacy policy linked below.
         </label>
       )}
+      <small>
+        For privacy on shared devices, Bitez signs you out after 60 minutes
+        without interaction. Saved runs and orders remain in your account.
+      </small>
       <button className="primary" disabled={busy || !supabase}>
         {busy
           ? "Please wait…"
@@ -106,6 +118,34 @@ export function Auth({
         <ArrowRight size={18} />
       </button>
       <div className="actions">
+        {mode === "signup" && (
+          <button
+            type="button"
+            disabled={busy || !supabase}
+            onClick={() => {
+              const input = form.current?.elements.namedItem(
+                "email",
+              ) as HTMLInputElement | null;
+              if (!input || !input.reportValidity()) return;
+              const email = input.value.trim();
+              void action(async () => {
+                const { error } = await client().auth.resend({
+                  type: "signup",
+                  email,
+                  options: {
+                    emailRedirectTo: authRedirectUrl(window.location.origin),
+                  },
+                });
+                if (error) throw error;
+                notify(
+                  "If this account needs confirmation, a new email has been sent. Use the newest link and open it in this browser.",
+                );
+              });
+            }}
+          >
+            Resend confirmation email
+          </button>
+        )}
         <button
           type="button"
           disabled={busy}
