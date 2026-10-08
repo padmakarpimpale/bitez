@@ -1,24 +1,21 @@
 import { useEffect, useRef, useState } from "react";
-import { ChevronLeft, ChevronRight, Pause, Play, Utensils } from "lucide-react";
+import { ChevronLeft, ChevronRight, Utensils } from "lucide-react";
 
 const meals = [
   {
     image: "/images/shared-lunch.webp",
-    name: "Lunch",
     alt: "Noodles, chicken rice and vegetables on a shared lunch table",
     title: "Your usual lunch. A new crew.",
     caption: "Find, chat, order, collect.",
   },
   {
     image: "/images/shared-breakfast.webp",
-    name: "Breakfast",
     alt: "Golden roti prata, vegetable curry and two glasses of teh tarik",
     title: "A slow morning. A shared table.",
     caption: "Prata, curry and a little company.",
   },
   {
     image: "/images/shared-dinner.webp",
-    name: "Dinner",
     alt: "Chicken satay with peanut sauce, rice cakes and vegetables",
     title: "Dinner plans, made together.",
     caption: "Start a run. Bring your neighbours.",
@@ -30,10 +27,11 @@ export function FoodCarousel() {
   const [active, setActive] = useState(0);
   const [ready, setReady] = useState(meals.map(() => false));
   const [paused, setPaused] = useState(false);
+  const [hovered, setHovered] = useState(false);
   const [reducedMotion, setReducedMotion] = useState(true);
   const [visible, setVisible] = useState(false);
   const [onScreen, setOnScreen] = useState(false);
-  const rotating = !paused && !reducedMotion && visible && onScreen;
+  const rotating = !paused && !hovered && !reducedMotion && visible && onScreen;
 
   useEffect(() => {
     const motion = window.matchMedia("(prefers-reduced-motion: reduce)");
@@ -102,7 +100,9 @@ export function FoodCarousel() {
       className="heroMedia foodCarousel"
       aria-label="Meals to share"
       aria-roledescription="carousel"
-      onMouseEnter={() => setPaused(true)}
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
+      onPointerDown={() => setPaused(true)}
       onFocusCapture={() => setPaused(true)}
       onKeyDown={(event) => {
         if (event.key !== "ArrowLeft" && event.key !== "ArrowRight") return;
@@ -126,41 +126,11 @@ export function FoodCarousel() {
           onError={() => markReady(index, false)}
         />
       ))}
-      <div className="carouselToolbar">
-        <div
-          className="carouselTabs"
-          role="group"
-          aria-label="Choose a meal image"
-        >
-          {meals.map((item, index) => (
-            <button
-              key={item.name}
-              type="button"
-              aria-label={`Show ${item.name.toLowerCase()} image`}
-              aria-current={active === index ? "true" : undefined}
-              disabled={!ready[index]}
-              onClick={() => choose(index)}
-            >
-              {item.name}
-            </button>
-          ))}
-        </div>
-        {!reducedMotion && (
-          <button
-            type="button"
-            className="carouselRotation"
-            aria-label={paused ? "Play meal slideshow" : "Pause meal slideshow"}
-            title={paused ? "Play slideshow" : "Pause slideshow"}
-            onClick={() => setPaused((current) => !current)}
-          >
-            {paused ? <Play size={16} /> : <Pause size={16} />}
-          </button>
-        )}
-      </div>
       <button
         type="button"
         className="carouselArrow previous"
         aria-label="Previous meal image"
+        title="Previous image — stops automatic rotation"
         disabled={ready.filter(Boolean).length < 2}
         onClick={() => choose(nextLoaded(active, -1))}
       >
@@ -170,6 +140,7 @@ export function FoodCarousel() {
         type="button"
         className="carouselArrow next"
         aria-label="Next meal image"
+        title="Next image — stops automatic rotation"
         disabled={ready.filter(Boolean).length < 2}
         onClick={() => choose(nextLoaded(active, 1))}
       >

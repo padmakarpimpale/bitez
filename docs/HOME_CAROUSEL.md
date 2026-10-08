@@ -1,11 +1,14 @@
 # Homepage meal carousel
 
 The welcome-page image rotates between lunch, breakfast and dinner every six
-seconds, with a 550 ms crossfade. Visitors can choose a meal directly, use arrows
-or arrow keys, and pause/resume rotation. Hovering or focusing the banner stops
-automatic rotation until the Play control is used. Rotation also stops while the
-page is hidden or the banner is outside the viewport. Reduced-motion preferences
-disable autoplay and transitions; manual controls remain available.
+seconds, with a 550 ms crossfade. The breakfast/lunch/dinner selectors and
+play/pause button were removed at the owner's request. Visitors can still use
+arrows or arrow keys to change the picture. Focusing a control, selecting an
+image or tapping the banner stops autoplay for that page visit. Hovering pauses
+temporarily, and rotation resumes when the pointer leaves unless the visitor
+has stopped it by interacting. Rotation also stops while the page is hidden or
+the banner is outside the viewport. Reduced-motion preferences disable autoplay
+and transitions; manual arrows remain available.
 
 The first image retains high loading priority. Other images are lazy loaded,
 locally hosted WebP assets. Only loaded images can be selected; a failed image
